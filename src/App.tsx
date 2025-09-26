@@ -6,7 +6,8 @@ import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 import { useMemo } from "react";
 import { useTexture, OrbitControls } from "@react-three/drei";
 import type { Mesh } from "three";
-import { useBoardStore } from "./useStore";
+import { useBoard, useBoardStore } from "./useStore";
+import { twMerge } from "tailwind-merge";
 
 function Model() {
   // const fbx = useLoader(FBXLoader, "/Chess_set_FBX.fbx");
@@ -52,13 +53,33 @@ function AppThreeJs() {
 }
 
 function App() {
-  const board = useBoardStore();
-  console.log(board);
+  const matrix = useBoard();
+
   return (
-    <div>
-      {/* <div>Bears = {bears}</div>
-      <button onClick={increasePopulation}>Increase population</button>
-      <button onClick={removeAllBears}>Remove all bears</button> */}
+    <div className="border-6 border-black h-full">
+      <div className="flex">
+        {matrix.map((columns) => {
+          return (
+            <div className="flex flex-col">
+              {columns.map((entry) => {
+                const [key, tile] = entry;
+                return (
+                  <div
+                    className={twMerge(
+                      "p-7",
+                      tile?.color === "black"
+                        ? "bg-black text-white"
+                        : "bg-white text-black"
+                    )}
+                  >
+                    {key}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

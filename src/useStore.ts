@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { create } from "zustand";
 
 type Color = "black" | "white";
@@ -24,6 +25,9 @@ type MetadataStore = {
   players: Players;
   turn: Color;
 };
+
+type MatrixColumn = [BoardPosition, Piece | null];
+
 const boardLetters: Array<BoardLetters> = [
   "A",
   "B",
@@ -112,3 +116,40 @@ export const useMetadataStore = create<MetadataStore>(() => ({
   ],
   turn: "white",
 }));
+
+// Store Abstractions
+export const useBoard = () => {
+  const board = useBoardStore();
+
+  const entries: Array<MatrixColumn> = useMemo(() => {
+    return Array.from(board.entries());
+  }, [board]);
+
+  const matrix = useMemo(() => {
+    let columns: Array<Array<MatrixColumn>> = [];
+    let column: Array<MatrixColumn> = [];
+    let currentLetter = "";
+
+    entries.forEach((entry) => {
+      const [key] = entry;
+      const tileLetter = key[0];
+      if (tileLetter !== currentLetter) {
+        if (column.length > 0) {
+          columns.push([...column]);
+        }
+        currentLetter = tileLetter;
+        column = [entry];
+      } else {
+        column.unshift(entry);
+      }
+    });
+
+    if (column.length > 0) {
+      columns.push([...column]);
+    }
+
+    return columns;
+  }, [entries]);
+
+  return matrix;
+};
