@@ -6,7 +6,7 @@ import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 import { useMemo } from "react";
 import { useTexture, OrbitControls } from "@react-three/drei";
 import type { Mesh } from "three";
-import { useChessStore } from "./useStore";
+import { useBoardStore } from "./useStore";
 
 function Model() {
   // const fbx = useLoader(FBXLoader, "/Chess_set_FBX.fbx");
@@ -52,13 +52,13 @@ function AppThreeJs() {
 }
 
 function App() {
-  const { bears, increasePopulation, removeAllBears } = useChessStore();
-
+  const board = useBoardStore();
+  console.log(board);
   return (
     <div>
-      <div>Bears = {bears}</div>
+      {/* <div>Bears = {bears}</div>
       <button onClick={increasePopulation}>Increase population</button>
-      <button onClick={removeAllBears}>Remove all bears</button>
+      <button onClick={removeAllBears}>Remove all bears</button> */}
     </div>
   );
 }
