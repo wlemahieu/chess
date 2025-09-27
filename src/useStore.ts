@@ -8,6 +8,14 @@ type Piece = {
   name: PieceName;
   color: Color;
   path: Path;
+  hasMoved?: boolean;
+};
+type MoveType = "move" | "capture" | "both";
+type Move = {
+  direction: string;
+  steps: number;
+  moveType?: MoveType;
+  customRule?: (piece: Piece) => boolean;
 };
 type BoardLetters = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H";
 type BoardNumbers = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
@@ -84,16 +92,179 @@ function getPieceColor(position: BoardPosition): Color {
   return position.includes(`7`) || position.includes(`8`) ? "black" : "white";
 }
 
-const movement = new Map([
+const movement = new Map<PieceName, Move[]>([
   [
     "pawn",
     [
-      { direction: "forward", steps: 1 },
+      { direction: "forward", steps: 1, moveType: "move" },
       {
         direction: "forward",
         steps: 2,
-        customRule: (player: Player) => player.moves === 0,
+        moveType: "move",
+        customRule: (piece: Piece) => !piece.hasMoved,
       },
+      { direction: "diagonal-forward-left", steps: 1, moveType: "capture" },
+      { direction: "diagonal-forward-right", steps: 1, moveType: "capture" },
+    ],
+  ],
+  [
+    "rook",
+    [
+      // Vertical and horizontal moves up to 7 squares
+      { direction: "forward", steps: 1 },
+      { direction: "forward", steps: 2 },
+      { direction: "forward", steps: 3 },
+      { direction: "forward", steps: 4 },
+      { direction: "forward", steps: 5 },
+      { direction: "forward", steps: 6 },
+      { direction: "forward", steps: 7 },
+      { direction: "backward", steps: 1 },
+      { direction: "backward", steps: 2 },
+      { direction: "backward", steps: 3 },
+      { direction: "backward", steps: 4 },
+      { direction: "backward", steps: 5 },
+      { direction: "backward", steps: 6 },
+      { direction: "backward", steps: 7 },
+      { direction: "left", steps: 1 },
+      { direction: "left", steps: 2 },
+      { direction: "left", steps: 3 },
+      { direction: "left", steps: 4 },
+      { direction: "left", steps: 5 },
+      { direction: "left", steps: 6 },
+      { direction: "left", steps: 7 },
+      { direction: "right", steps: 1 },
+      { direction: "right", steps: 2 },
+      { direction: "right", steps: 3 },
+      { direction: "right", steps: 4 },
+      { direction: "right", steps: 5 },
+      { direction: "right", steps: 6 },
+      { direction: "right", steps: 7 },
+    ],
+  ],
+  [
+    "bishop",
+    [
+      // Diagonal moves up to 7 squares
+      { direction: "diagonal-forward-left", steps: 1 },
+      { direction: "diagonal-forward-left", steps: 2 },
+      { direction: "diagonal-forward-left", steps: 3 },
+      { direction: "diagonal-forward-left", steps: 4 },
+      { direction: "diagonal-forward-left", steps: 5 },
+      { direction: "diagonal-forward-left", steps: 6 },
+      { direction: "diagonal-forward-left", steps: 7 },
+      { direction: "diagonal-forward-right", steps: 1 },
+      { direction: "diagonal-forward-right", steps: 2 },
+      { direction: "diagonal-forward-right", steps: 3 },
+      { direction: "diagonal-forward-right", steps: 4 },
+      { direction: "diagonal-forward-right", steps: 5 },
+      { direction: "diagonal-forward-right", steps: 6 },
+      { direction: "diagonal-forward-right", steps: 7 },
+      { direction: "diagonal-backward-left", steps: 1 },
+      { direction: "diagonal-backward-left", steps: 2 },
+      { direction: "diagonal-backward-left", steps: 3 },
+      { direction: "diagonal-backward-left", steps: 4 },
+      { direction: "diagonal-backward-left", steps: 5 },
+      { direction: "diagonal-backward-left", steps: 6 },
+      { direction: "diagonal-backward-left", steps: 7 },
+      { direction: "diagonal-backward-right", steps: 1 },
+      { direction: "diagonal-backward-right", steps: 2 },
+      { direction: "diagonal-backward-right", steps: 3 },
+      { direction: "diagonal-backward-right", steps: 4 },
+      { direction: "diagonal-backward-right", steps: 5 },
+      { direction: "diagonal-backward-right", steps: 6 },
+      { direction: "diagonal-backward-right", steps: 7 },
+    ],
+  ],
+  [
+    "knight",
+    [
+      // L-shaped moves: 2 squares in one direction, 1 in perpendicular
+      { direction: "knight-forward-left", steps: 1 },
+      { direction: "knight-forward-right", steps: 1 },
+      { direction: "knight-backward-left", steps: 1 },
+      { direction: "knight-backward-right", steps: 1 },
+      { direction: "knight-left-forward", steps: 1 },
+      { direction: "knight-left-backward", steps: 1 },
+      { direction: "knight-right-forward", steps: 1 },
+      { direction: "knight-right-backward", steps: 1 },
+    ],
+  ],
+  [
+    "queen",
+    [
+      // Combination of rook and bishop moves
+      // Vertical and horizontal
+      { direction: "forward", steps: 1 },
+      { direction: "forward", steps: 2 },
+      { direction: "forward", steps: 3 },
+      { direction: "forward", steps: 4 },
+      { direction: "forward", steps: 5 },
+      { direction: "forward", steps: 6 },
+      { direction: "forward", steps: 7 },
+      { direction: "backward", steps: 1 },
+      { direction: "backward", steps: 2 },
+      { direction: "backward", steps: 3 },
+      { direction: "backward", steps: 4 },
+      { direction: "backward", steps: 5 },
+      { direction: "backward", steps: 6 },
+      { direction: "backward", steps: 7 },
+      { direction: "left", steps: 1 },
+      { direction: "left", steps: 2 },
+      { direction: "left", steps: 3 },
+      { direction: "left", steps: 4 },
+      { direction: "left", steps: 5 },
+      { direction: "left", steps: 6 },
+      { direction: "left", steps: 7 },
+      { direction: "right", steps: 1 },
+      { direction: "right", steps: 2 },
+      { direction: "right", steps: 3 },
+      { direction: "right", steps: 4 },
+      { direction: "right", steps: 5 },
+      { direction: "right", steps: 6 },
+      { direction: "right", steps: 7 },
+      // Diagonals
+      { direction: "diagonal-forward-left", steps: 1 },
+      { direction: "diagonal-forward-left", steps: 2 },
+      { direction: "diagonal-forward-left", steps: 3 },
+      { direction: "diagonal-forward-left", steps: 4 },
+      { direction: "diagonal-forward-left", steps: 5 },
+      { direction: "diagonal-forward-left", steps: 6 },
+      { direction: "diagonal-forward-left", steps: 7 },
+      { direction: "diagonal-forward-right", steps: 1 },
+      { direction: "diagonal-forward-right", steps: 2 },
+      { direction: "diagonal-forward-right", steps: 3 },
+      { direction: "diagonal-forward-right", steps: 4 },
+      { direction: "diagonal-forward-right", steps: 5 },
+      { direction: "diagonal-forward-right", steps: 6 },
+      { direction: "diagonal-forward-right", steps: 7 },
+      { direction: "diagonal-backward-left", steps: 1 },
+      { direction: "diagonal-backward-left", steps: 2 },
+      { direction: "diagonal-backward-left", steps: 3 },
+      { direction: "diagonal-backward-left", steps: 4 },
+      { direction: "diagonal-backward-left", steps: 5 },
+      { direction: "diagonal-backward-left", steps: 6 },
+      { direction: "diagonal-backward-left", steps: 7 },
+      { direction: "diagonal-backward-right", steps: 1 },
+      { direction: "diagonal-backward-right", steps: 2 },
+      { direction: "diagonal-backward-right", steps: 3 },
+      { direction: "diagonal-backward-right", steps: 4 },
+      { direction: "diagonal-backward-right", steps: 5 },
+      { direction: "diagonal-backward-right", steps: 6 },
+      { direction: "diagonal-backward-right", steps: 7 },
+    ],
+  ],
+  [
+    "king",
+    [
+      // One square in any direction
+      { direction: "forward", steps: 1 },
+      { direction: "backward", steps: 1 },
+      { direction: "left", steps: 1 },
+      { direction: "right", steps: 1 },
+      { direction: "diagonal-forward-left", steps: 1 },
+      { direction: "diagonal-forward-right", steps: 1 },
+      { direction: "diagonal-backward-left", steps: 1 },
+      { direction: "diagonal-backward-right", steps: 1 },
     ],
   ],
 ]);
@@ -121,6 +292,23 @@ function getDirectionModifier(
       return { row: isBlack ? 1 : -1, col: isBlack ? 1 : -1 };
     case "diagonal-backward-right":
       return { row: isBlack ? 1 : -1, col: isBlack ? -1 : 1 };
+    // Knight moves (L-shape: 2 squares in one direction, 1 in perpendicular)
+    case "knight-forward-left":
+      return { row: isBlack ? -2 : 2, col: isBlack ? 1 : -1 };
+    case "knight-forward-right":
+      return { row: isBlack ? -2 : 2, col: isBlack ? -1 : 1 };
+    case "knight-backward-left":
+      return { row: isBlack ? 2 : -2, col: isBlack ? 1 : -1 };
+    case "knight-backward-right":
+      return { row: isBlack ? 2 : -2, col: isBlack ? -1 : 1 };
+    case "knight-left-forward":
+      return { row: isBlack ? -1 : 1, col: isBlack ? 2 : -2 };
+    case "knight-left-backward":
+      return { row: isBlack ? 1 : -1, col: isBlack ? 2 : -2 };
+    case "knight-right-forward":
+      return { row: isBlack ? -1 : 1, col: isBlack ? -2 : 2 };
+    case "knight-right-backward":
+      return { row: isBlack ? 1 : -1, col: isBlack ? -2 : 2 };
     default:
       return { row: 0, col: 0 };
   }
@@ -128,21 +316,38 @@ function getDirectionModifier(
 
 function getPiecePath(
   position: BoardPosition,
-  pieceName: PieceName,
-  player?: Player
+  piece: Piece,
+  board: BoardStore
 ): Path {
+  const pieceName = piece.name;
   const [columnLetter, rowNumber] = position;
   const moves = movement.get(pieceName);
   if (!moves) return [];
 
-  const pieceColor = getPieceColor(position);
+  const pieceColor = piece.color;
   const columnIndex = boardLetters.indexOf(columnLetter as BoardLetters);
+  const validMoves: Path = [];
 
-  return moves
-    .filter((move) => {
-      return !player || !move.customRule || move.customRule(player);
-    })
-    .map((move) => {
+  // Group moves by direction for path blocking
+  const movesByDirection: Record<string, typeof moves> = {};
+  moves.forEach((move) => {
+    if (!movesByDirection[move.direction]) {
+      movesByDirection[move.direction] = [];
+    }
+    movesByDirection[move.direction].push(move);
+  });
+
+  // Process each direction
+  for (const [direction, dirMoves] of Object.entries(movesByDirection)) {
+    // Sort moves by steps to check them in order
+    const sortedMoves = dirMoves.sort((a, b) => a.steps - b.steps);
+
+    for (const move of sortedMoves) {
+      // Check custom rules (like pawn's first move)
+      if (move.customRule && !move.customRule(piece)) {
+        continue;
+      }
+
       const dirModifier = getDirectionModifier(move.direction, pieceColor);
       const newRowIndex = Number(rowNumber) + move.steps * dirModifier.row;
       const newColIndex = columnIndex + move.steps * dirModifier.col;
@@ -154,46 +359,140 @@ function getPiecePath(
         newColIndex < 0 ||
         newColIndex > 7
       ) {
-        return null;
+        continue;
       }
 
       const newColumnLetter = boardLetters[newColIndex];
-      const position = `${newColumnLetter}${newRowIndex}` as BoardPosition;
-      return { position };
-    })
-    .filter(Boolean) as Path;
+      const targetPosition = `${newColumnLetter}${newRowIndex}` as BoardPosition;
+      const targetTile = board.get(targetPosition);
+
+      // Special rules for pawns
+      if (pieceName === "pawn") {
+        const moveType = move.moveType || "both";
+
+        if (moveType === "move") {
+          // Pawns can only move forward to empty squares
+          if (targetTile?.piece) {
+            // Can't move forward into any piece
+            break; // Block further moves in this direction
+          } else {
+            // Empty square - can move there
+            validMoves.push({ position: targetPosition });
+          }
+        } else if (moveType === "capture") {
+          // Pawns can only capture diagonally if there's an enemy piece
+          if (targetTile?.piece && targetTile.piece.color !== pieceColor) {
+            // Enemy piece - can capture
+            validMoves.push({ position: targetPosition });
+          }
+          // If no enemy piece or friendly piece, pawn can't move diagonally
+          continue;
+        }
+      } else {
+        // Normal piece movement rules
+        // Check if there's a piece at the target position
+        if (targetTile?.piece) {
+          // Can't land on friendly pieces
+          if (targetTile.piece.color === pieceColor) {
+            // Knights can jump but still can't land on friendlies
+            if (pieceName === "knight") {
+              continue;
+            }
+            // For non-knights, block this entire direction
+            break;
+          } else {
+            // Enemy piece - can capture
+            validMoves.push({ position: targetPosition });
+            // For non-knights, can't continue past enemy piece
+            if (pieceName !== "knight") {
+              break;
+            }
+          }
+        } else {
+          // Empty square - can move there
+          validMoves.push({ position: targetPosition });
+        }
+      }
+
+      // For pieces that need clear paths (non-knights), check intermediate squares
+      if (pieceName !== "knight" && move.steps > 1) {
+        // Check all squares between current position and target
+        let blocked = false;
+        for (let step = 1; step < move.steps; step++) {
+          const intermediateRow = Number(rowNumber) + step * dirModifier.row;
+          const intermediateCol = columnIndex + step * dirModifier.col;
+
+          if (
+            intermediateRow < 1 ||
+            intermediateRow > 8 ||
+            intermediateCol < 0 ||
+            intermediateCol > 7
+          ) {
+            blocked = true;
+            break;
+          }
+
+          const intermediateColumn = boardLetters[intermediateCol];
+          const intermediatePosition = `${intermediateColumn}${intermediateRow}` as BoardPosition;
+          const intermediateTile = board.get(intermediatePosition);
+
+          if (intermediateTile?.piece) {
+            // Path is blocked
+            blocked = true;
+            break;
+          }
+        }
+
+        if (blocked) {
+          // Remove this move and stop checking further moves in this direction
+          validMoves.pop();
+          break;
+        }
+      }
+    }
+  }
+
+  return validMoves;
 }
 
 function createBoard(): Board {
-  const tileMap = new Map();
-  const piecesMap = new Map<BoardPosition, Piece>();
+  const tileMap = new Map() as Board;
+  const piecesMap = new Map<BoardPosition, Omit<Piece, 'path'>>();
+
+  // First, create all pieces without paths
   initialPieces.forEach((piece) => {
     const { name, initialPositions } = piece;
     initialPositions.forEach((position) =>
       piecesMap.set(position, {
         name,
         color: getPieceColor(position),
-        path: getPiecePath(position, piece.name),
+        hasMoved: false,
       })
     );
   });
 
+  // Create the board with tiles and pieces (without paths)
   let tileColor: Color | null = null;
-
   for (let columnIndex = 0; columnIndex < 8; columnIndex++) {
     tileColor = columnIndex % 2 ? (tileColor = "white") : "black";
     for (let rowIndex = 0; rowIndex < 8; rowIndex++) {
       const columnLetter = boardLetters[columnIndex];
       const rowNumber = String(rowIndex + 1);
       const position = `${columnLetter}${rowNumber}` as BoardPosition;
-      const piece = piecesMap.get(position);
-      if (position === "A2") console.log("getPiecePath", { position, piece });
+      const pieceData = piecesMap.get(position);
 
       tileMap.set(position, {
-        piece,
+        piece: pieceData ? { ...pieceData, path: [] } as Piece : undefined,
         color: tileColor,
       });
       tileColor = tileColor === "black" ? "white" : "black";
+    }
+  }
+
+  // Now calculate paths with the complete board
+  for (const [position, tileData] of tileMap.entries()) {
+    if (tileData.piece) {
+      tileData.piece.path = getPiecePath(position, tileData.piece, tileMap);
     }
   }
 
@@ -214,10 +513,11 @@ export const useBoardStore = create<BoardStoreState>((set) => ({
       const destTile = newBoard.get(to);
 
       if (sourceTile?.piece && destTile) {
-        // Move piece to destination
+        // Move piece to destination and mark it as having moved
+        const movedPiece = { ...sourceTile.piece, hasMoved: true };
         newBoard.set(to, {
           ...destTile,
-          piece: sourceTile.piece
+          piece: movedPiece
         });
 
         // Clear source tile
@@ -225,6 +525,13 @@ export const useBoardStore = create<BoardStoreState>((set) => ({
           ...sourceTile,
           piece: undefined
         });
+
+        // Recalculate paths for all pieces after the move
+        for (const [position, tileData] of newBoard.entries()) {
+          if (tileData.piece) {
+            tileData.piece.path = getPiecePath(position, tileData.piece, newBoard);
+          }
+        }
       }
 
       return { board: newBoard };
