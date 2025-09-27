@@ -2,11 +2,7 @@ import { useMemo } from "react";
 import { create } from "zustand";
 
 type Color = "black" | "white";
-type Player = {
-  name: string;
-  color: Color;
-};
-type Players = [Player, Player];
+
 type PieceName = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
 type Piece = {
   name: PieceName;
@@ -15,18 +11,17 @@ type Piece = {
 type BoardLetters = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H";
 type BoardNumbers = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
 type BoardPosition = `${BoardLetters}${BoardNumbers}`;
-type Board = Map<BoardPosition, null | Piece>;
+type Board = Map<BoardPosition, TileData>;
 type Pieces = Array<{
   name: PieceName;
   initialPositions: Array<BoardPosition>;
 }>;
-type BoardStore = Map<BoardPosition, null | Piece>;
-type MetadataStore = {
-  players: Players;
-  turn: Color;
-};
+type BoardStore = Map<BoardPosition, TileData>;
 
-type MatrixColumn = [BoardPosition, Piece | null];
+type TileData = { color: Color; piece: Piece };
+export type Tile = [BoardPosition, TileData];
+type MatrixColumn = Tile;
+type Matrix = Array<Array<MatrixColumn>>;
 
 const boardLetters: Array<BoardLetters> = [
   "A",
@@ -62,7 +57,7 @@ const pieces: Pieces = [
   },
   {
     name: "pawn",
-    initialPositions: ["A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2"],
+    initialPositions: ["A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2", "A7", "B7", "C7", "D7", "E7", "F7", "G7", "H7"],
   },
 ];
 
@@ -103,6 +98,16 @@ function createBoard(): Board {
 }
 
 export const useBoardStore = create<BoardStore>(createBoard);
+
+type Player = {
+  name: string;
+  color: Color;
+};
+type Players = [Player, Player];
+type MetadataStore = {
+  players: Players;
+  turn: Color;
+};
 export const useMetadataStore = create<MetadataStore>(() => ({
   players: [
     {
@@ -118,7 +123,12 @@ export const useMetadataStore = create<MetadataStore>(() => ({
 }));
 
 // Store Abstractions
-export const useBoard = () => {
+
+/**
+ * useBoard
+ * @returns
+ */
+export const useBoardMatrix = (): Matrix => {
   const board = useBoardStore();
 
   const entries: Array<MatrixColumn> = useMemo(() => {
@@ -126,13 +136,12 @@ export const useBoard = () => {
   }, [board]);
 
   const matrix = useMemo(() => {
-    let columns: Array<Array<MatrixColumn>> = [];
+    let columns: Matrix = [];
     let column: Array<MatrixColumn> = [];
     let currentLetter = "";
 
     entries.forEach((entry) => {
-      const [key] = entry;
-      const tileLetter = key[0];
+      const [[tileLetter]] = entry;
       if (tileLetter !== currentLetter) {
         if (column.length > 0) {
           columns.push([...column]);

@@ -6,7 +6,7 @@ import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 import { useMemo } from "react";
 import { useTexture, OrbitControls } from "@react-three/drei";
 import type { Mesh } from "three";
-import { useBoard, useBoardStore } from "./useStore";
+import { useBoardMatrix, useBoardStore, type Tile } from "./useStore";
 import { twMerge } from "tailwind-merge";
 
 function Model() {
@@ -52,28 +52,49 @@ function AppThreeJs() {
   );
 }
 
+type TileProps = { tile: Tile };
+function Tile({ tile }: TileProps) {
+  const [tileKey, tileData] = tile;
+  console.log("tile", tile);
+  return (
+    <div
+      className={twMerge(
+        "w-[100px] h-[100px] relative hover:bg-blue-500 flex items-center justify-center",
+        tileData?.color === "black"
+          ? "bg-gray-700 text-gray-100"
+          : "bg-gray-300 text-gray-900"
+      )}
+    >
+      <span className="absolute bottom-1 left-1 text-xs italic">{tileKey}</span>
+      {tileData?.piece && (
+        <div className="flex flex-col items-center">
+          <span className="text-lg font-semibold">{tileData.piece.name}</span>
+          <span className={twMerge(
+            "text-xs",
+            tileData.piece.color === "black" ? "text-black" : "text-white"
+          )}>
+            {tileData.piece.color === "black" ? "●" : "○"}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
 function App() {
-  const matrix = useBoard();
+  const matrix = useBoardMatrix();
 
   return (
     <div className="border-6 border-black h-full">
-      <div className="flex">
-        {matrix.map((columns) => {
+      <div className="flex w-[800px]">
+        {matrix.map((letterColumn, columnIndex) => {
           return (
-            <div className="flex flex-col">
-              {columns.map((entry) => {
-                const [key, tile] = entry;
+            <div key={`column-${columnIndex}`} className="flex flex-col w-[100px]">
+              {letterColumn.map((tile, tileIndex) => {
                 return (
-                  <div
-                    className={twMerge(
-                      "p-7",
-                      tile?.color === "black"
-                        ? "bg-black text-white"
-                        : "bg-white text-black"
-                    )}
-                  >
-                    {key}
-                  </div>
+                  <Tile
+                    key={`column-${columnIndex}-tile-${tileIndex}`}
+                    tile={tile}
+                  />
                 );
               })}
             </div>
