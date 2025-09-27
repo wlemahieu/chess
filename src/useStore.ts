@@ -2,7 +2,13 @@ import { useMemo } from "react";
 import { create } from "zustand";
 
 type Color = "black" | "white";
-type PieceName = "king" | "queen" | "rook" | "bishop" | "knight" | "pawn";
+export type PieceName =
+  | "king"
+  | "queen"
+  | "rook"
+  | "bishop"
+  | "knight"
+  | "pawn";
 type Path = Array<{ position: BoardPosition }>;
 type Piece = {
   name: PieceName;
@@ -430,6 +436,91 @@ function getPiecePath(
   return validMoves;
 }
 
+function findKing(board: BoardStore, color: Color): BoardPosition | null {
+  for (const [position, tile] of board.entries()) {
+    if (tile.piece?.name === "king" && tile.piece.color === color) {
+      return position;
+    }
+  }
+  return null;
+}
+
+function isPositionUnderAttack(
+  board: BoardStore,
+  position: BoardPosition,
+  byColor: Color
+): boolean {
+  for (const [piecePos, tile] of board.entries()) {
+    if (tile.piece && tile.piece.color === byColor) {
+      const pieceMoves = getPiecePath(piecePos, tile.piece, board);
+      if (pieceMoves.some((move) => move.position === position)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isKingInCheck(board: BoardStore, kingColor: Color): boolean {
+  const kingPosition = findKing(board, kingColor);
+  if (!kingPosition) return false;
+  return isPositionUnderAttack(
+    board,
+    kingPosition,
+    kingColor === "white" ? "black" : "white"
+  );
+}
+
+function wouldMoveLeaveKingInCheck(
+  board: BoardStore,
+  from: BoardPosition,
+  to: BoardPosition,
+  movingPiece: Piece
+): boolean {
+  const testBoard = new Map(board) as BoardStore;
+  const destTile = testBoard.get(to);
+  const sourceTile = testBoard.get(from);
+
+  if (destTile && sourceTile) {
+    testBoard.set(to, { ...destTile, piece: movingPiece });
+    testBoard.set(from, { ...sourceTile, piece: undefined });
+  }
+
+  return isKingInCheck(testBoard, movingPiece.color);
+}
+
+function getAllLegalMoves(
+  board: BoardStore,
+  color: Color
+): Array<{ from: BoardPosition; to: BoardPosition }> {
+  const legalMoves: Array<{ from: BoardPosition; to: BoardPosition }> = [];
+
+  for (const [position, tile] of board.entries()) {
+    if (tile.piece && tile.piece.color === color) {
+      const pieceMoves = getPiecePath(position, tile.piece, board);
+      for (const move of pieceMoves) {
+        if (
+          !wouldMoveLeaveKingInCheck(board, position, move.position, tile.piece)
+        ) {
+          legalMoves.push({ from: position, to: move.position });
+        }
+      }
+    }
+  }
+
+  return legalMoves;
+}
+
+function isCheckmate(board: BoardStore, color: Color): boolean {
+  if (!isKingInCheck(board, color)) return false;
+  return getAllLegalMoves(board, color).length === 0;
+}
+
+function isStalemate(board: BoardStore, color: Color): boolean {
+  if (isKingInCheck(board, color)) return false;
+  return getAllLegalMoves(board, color).length === 0;
+}
+
 function createBoard(): Board {
   const tileMap = new Map() as Board;
   const piecesMap = new Map<BoardPosition, Omit<Piece, "path">>();
@@ -478,9 +569,13 @@ type BoardStoreState = {
   capturedPieces: { white: Piece[]; black: Piece[] };
   showBoardPositions: boolean;
   promotionPosition: BoardPosition | null;
+  inCheck: Color | null;
+  checkmate: boolean;
+  stalemate: boolean;
+  lastMove: { from: BoardPosition; to: BoardPosition; piece: Piece } | null;
   movePiece: (from: BoardPosition, to: BoardPosition) => void;
   toggleBoardPositions: () => void;
-  promotePawn: (position: BoardPosition, newPiece: Piece) => void;
+  promotePawn: (position: BoardPosition, promoteTo: PieceName) => void;
 };
 
 export const useBoardStore = create<BoardStoreState>((set) => ({
@@ -489,6 +584,10 @@ export const useBoardStore = create<BoardStoreState>((set) => ({
   capturedPieces: { white: [], black: [] },
   showBoardPositions: true,
   promotionPosition: null,
+  inCheck: null,
+  checkmate: false,
+  stalemate: false,
+  lastMove: null,
   movePiece: (from: BoardPosition, to: BoardPosition) => {
     set((state) => {
       const newBoard = new Map(state.board) as BoardStore;
@@ -538,30 +637,42 @@ export const useBoardStore = create<BoardStoreState>((set) => ({
           }
         }
 
+        if (wouldMoveLeaveKingInCheck(newBoard, from, to, movedPiece)) {
+          return state;
+        }
+
         const isPawnPromotion =
           movedPiece.name === "pawn" &&
           ((movedPiece.color === "white" && to.includes("8")) ||
             (movedPiece.color === "black" && to.includes("1")));
 
-        const capturedByColor =
-          movedPiece.color === "white"
-            ? newCapturedPieces.black
-            : newCapturedPieces.white;
-
-        if (isPawnPromotion && capturedByColor.length > 0) {
+        if (isPawnPromotion) {
           return {
             board: newBoard,
             currentTurn: state.currentTurn,
             capturedPieces: newCapturedPieces,
             promotionPosition: to,
+            inCheck: state.inCheck,
+            checkmate: false,
+            stalemate: false,
+            lastMove: { from, to, piece: movedPiece },
           };
         }
 
+        const nextTurn = state.currentTurn === "white" ? "black" : "white";
+        const inCheck = isKingInCheck(newBoard, nextTurn) ? nextTurn : null;
+        const checkmate = inCheck ? isCheckmate(newBoard, nextTurn) : false;
+        const stalemate = !inCheck ? isStalemate(newBoard, nextTurn) : false;
+
         return {
           board: newBoard,
-          currentTurn: state.currentTurn === "white" ? "black" : "white",
+          currentTurn: nextTurn,
           capturedPieces: newCapturedPieces,
           promotionPosition: null,
+          inCheck,
+          checkmate,
+          stalemate,
+          lastMove: { from, to, piece: movedPiece },
         };
       }
 
@@ -571,40 +682,24 @@ export const useBoardStore = create<BoardStoreState>((set) => ({
   toggleBoardPositions: () => {
     set((state) => ({ showBoardPositions: !state.showBoardPositions }));
   },
-  promotePawn: (position: BoardPosition, newPiece: Piece) => {
+  promotePawn: (position: BoardPosition, promoteTo: PieceName) => {
     set((state) => {
       const newBoard = new Map(state.board) as BoardStore;
       const tile = newBoard.get(position);
+      const pawn = tile?.piece;
 
-      if (tile) {
+      if (tile && pawn && pawn.name === "pawn") {
+        const newPiece: Piece = {
+          name: promoteTo,
+          color: pawn.color,
+          hasMoved: true,
+          path: [],
+        };
+
         newBoard.set(position, {
           ...tile,
-          piece: { ...newPiece, hasMoved: true, path: [] },
+          piece: newPiece,
         });
-
-        const newCapturedPieces = { ...state.capturedPieces };
-        const capturedArray =
-          newPiece.color === "white"
-            ? newCapturedPieces.black
-            : newCapturedPieces.white;
-
-        const index = capturedArray.findIndex(
-          (p) => p.name === newPiece.name && p.color === newPiece.color
-        );
-
-        if (index > -1) {
-          if (newPiece.color === "white") {
-            newCapturedPieces.black = [
-              ...capturedArray.slice(0, index),
-              ...capturedArray.slice(index + 1),
-            ];
-          } else {
-            newCapturedPieces.white = [
-              ...capturedArray.slice(0, index),
-              ...capturedArray.slice(index + 1),
-            ];
-          }
-        }
 
         for (const [pos, tileData] of newBoard.entries()) {
           if (tileData.piece) {
@@ -612,11 +707,20 @@ export const useBoardStore = create<BoardStoreState>((set) => ({
           }
         }
 
+        const nextTurn = state.currentTurn === "white" ? "black" : "white";
+        const inCheck = isKingInCheck(newBoard, nextTurn) ? nextTurn : null;
+        const checkmate = inCheck ? isCheckmate(newBoard, nextTurn) : false;
+        const stalemate = !inCheck ? isStalemate(newBoard, nextTurn) : false;
+
         return {
           board: newBoard,
-          currentTurn: state.currentTurn === "white" ? "black" : "white",
-          capturedPieces: newCapturedPieces,
+          currentTurn: nextTurn,
+          capturedPieces: state.capturedPieces,
           promotionPosition: null,
+          inCheck,
+          checkmate,
+          stalemate,
+          lastMove: state.lastMove,
         };
       }
 

@@ -12,7 +12,7 @@ import {
   useMetadataStore,
   type Tile,
   type BoardPosition,
-  type TileData,
+  type PieceName,
 } from "./useStore";
 import { twMerge } from "tailwind-merge";
 
@@ -129,6 +129,9 @@ function App() {
     toggleBoardPositions,
     promotionPosition,
     promotePawn,
+    inCheck,
+    checkmate,
+    stalemate,
   } = useBoardStore();
   const { players, setPlayerName } = useMetadataStore();
   const [hoveredTile, setHoveredTile] = useState<string | null>(null);
@@ -253,38 +256,51 @@ function App() {
   const promotingPiece = promotionPosition
     ? board.get(promotionPosition)?.piece
     : null;
-  const availableForPromotion = promotingPiece
-    ? promotingPiece.color === "white"
-      ? capturedPieces.black
-      : capturedPieces.white
-    : [];
+  const promotionOptions: Array<PieceName> = [
+    "queen",
+    "rook",
+    "bishop",
+    "knight",
+  ];
 
   return (
     <div className="flex h-screen bg-gray-100 relative">
-      {promotionPosition && availableForPromotion.length > 0 && (
+      {checkmate && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+            <h1 className="text-3xl font-bold mb-4">Checkmate!</h1>
+            <h2 className="text-xl">
+              {players.find((p) => p.color !== currentTurn)?.name} wins!
+            </h2>
+          </div>
+        </div>
+      )}
+
+      {stalemate && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+            <h1 className="text-3xl font-bold mb-4">Stalemate!</h1>
+            <h2 className="text-xl">The game is a draw</h2>
+          </div>
+        </div>
+      )}
+
+      {promotionPosition && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">
-              Choose a piece to revive:
-            </h2>
-            <div className="grid grid-cols-3 gap-4">
-              {availableForPromotion.map((piece, idx) => (
+            <h2 className="text-xl font-bold mb-4">Promote pawn to:</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {promotionOptions.map((pieceName) => (
                 <button
-                  key={idx}
-                  onClick={() => {
-                    const revivePiece = {
-                      ...piece,
-                      color: promotingPiece!.color,
-                    };
-                    promotePawn(promotionPosition, revivePiece);
-                  }}
+                  key={pieceName}
+                  onClick={() => promotePawn(promotionPosition, pieceName)}
                   className="p-4 border rounded hover:bg-gray-200 flex flex-col items-center"
                 >
                   <span className="text-lg font-semibold capitalize">
-                    {piece.name}
+                    {pieceName}
                   </span>
                   <span className="text-2xl">
-                    {piece.color === "white" ? "○" : "●"}
+                    {promotingPiece?.color === "white" ? "○" : "●"}
                   </span>
                 </button>
               ))}
@@ -338,6 +354,9 @@ function App() {
             <span className="ml-2 text-lg">
               ({currentTurn === "black" ? "●" : "○"})
             </span>
+            {inCheck && (
+              <span className="ml-2 text-red-600 font-bold">CHECK!</span>
+            )}
           </h2>
         </div>
 
