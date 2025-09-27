@@ -3,7 +3,7 @@ import "./App.css";
 import { useLoader } from "@react-three/fiber";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTexture, OrbitControls } from "@react-three/drei";
 import type { Mesh } from "three";
 import { useBoardMatrix, useBoardStore, type Tile } from "./useStore";
@@ -52,27 +52,36 @@ function AppThreeJs() {
   );
 }
 
-type TileProps = { tile: Tile };
-function Tile({ tile }: TileProps) {
+type TileProps = {
+  tile: Tile;
+  isValidMove: boolean;
+  onHover: (tileKey: string | null) => void;
+};
+function Tile({ tile, isValidMove, onHover }: TileProps) {
   const [tileKey, tileData] = tile;
-  console.log("tile", tile);
+
   return (
     <div
       className={twMerge(
         "w-[100px] h-[100px] relative hover:bg-blue-500 flex items-center justify-center",
         tileData?.color === "black"
           ? "bg-gray-700 text-gray-100"
-          : "bg-gray-300 text-gray-900"
+          : "bg-gray-300 text-gray-900",
+        isValidMove && "bg-pink-400"
       )}
+      onMouseEnter={() => tileData?.piece && onHover(tileKey)}
+      onMouseLeave={() => onHover(null)}
     >
       <span className="absolute bottom-1 left-1 text-xs italic">{tileKey}</span>
       {tileData?.piece && (
         <div className="flex flex-col items-center">
           <span className="text-lg font-semibold">{tileData.piece.name}</span>
-          <span className={twMerge(
-            "text-xs",
-            tileData.piece.color === "black" ? "text-black" : "text-white"
-          )}>
+          <span
+            className={twMerge(
+              "text-xs",
+              tileData.piece.color === "black" ? "text-black" : "text-white"
+            )}
+          >
             {tileData.piece.color === "black" ? "●" : "○"}
           </span>
         </div>
@@ -82,18 +91,36 @@ function Tile({ tile }: TileProps) {
 }
 function App() {
   const matrix = useBoardMatrix();
+  const board = useBoardStore();
+  const [hoveredTile, setHoveredTile] = useState<string | null>(null);
+
+  // Get valid moves for the hovered piece
+  const validMoves = useMemo(() => {
+    if (!hoveredTile) return new Set<string>();
+
+    const tileData = board.get(hoveredTile as any);
+    if (!tileData?.piece?.path) return new Set<string>();
+
+    return new Set(tileData.piece.path.map((move) => move.position));
+  }, [hoveredTile, board]);
 
   return (
     <div className="border-6 border-black h-full">
       <div className="flex w-[800px]">
         {matrix.map((letterColumn, columnIndex) => {
           return (
-            <div key={`column-${columnIndex}`} className="flex flex-col w-[100px]">
+            <div
+              key={`column-${columnIndex}`}
+              className="flex flex-col w-[100px]"
+            >
               {letterColumn.map((tile, tileIndex) => {
+                const [tileKey] = tile;
                 return (
                   <Tile
                     key={`column-${columnIndex}-tile-${tileIndex}`}
                     tile={tile}
+                    isValidMove={validMoves.has(tileKey)}
+                    onHover={setHoveredTile}
                   />
                 );
               })}
