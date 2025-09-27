@@ -110,7 +110,6 @@ const movement = new Map<PieceName, Move[]>([
   [
     "rook",
     [
-      // Vertical and horizontal moves up to 7 squares
       { direction: "forward", steps: 1 },
       { direction: "forward", steps: 2 },
       { direction: "forward", steps: 3 },
@@ -144,7 +143,6 @@ const movement = new Map<PieceName, Move[]>([
   [
     "bishop",
     [
-      // Diagonal moves up to 7 squares
       { direction: "diagonal-forward-left", steps: 1 },
       { direction: "diagonal-forward-left", steps: 2 },
       { direction: "diagonal-forward-left", steps: 3 },
@@ -192,8 +190,6 @@ const movement = new Map<PieceName, Move[]>([
   [
     "queen",
     [
-      // Combination of rook and bishop moves
-      // Vertical and horizontal
       { direction: "forward", steps: 1 },
       { direction: "forward", steps: 2 },
       { direction: "forward", steps: 3 },
@@ -222,7 +218,6 @@ const movement = new Map<PieceName, Move[]>([
       { direction: "right", steps: 5 },
       { direction: "right", steps: 6 },
       { direction: "right", steps: 7 },
-      // Diagonals
       { direction: "diagonal-forward-left", steps: 1 },
       { direction: "diagonal-forward-left", steps: 2 },
       { direction: "diagonal-forward-left", steps: 3 },
@@ -256,7 +251,6 @@ const movement = new Map<PieceName, Move[]>([
   [
     "king",
     [
-      // One square in any direction
       { direction: "forward", steps: 1 },
       { direction: "backward", steps: 1 },
       { direction: "left", steps: 1 },
@@ -328,7 +322,6 @@ function getPiecePath(
   const columnIndex = boardLetters.indexOf(columnLetter as BoardLetters);
   const validMoves: Path = [];
 
-  // Group moves by direction for path blocking
   const movesByDirection: Record<string, typeof moves> = {};
   moves.forEach((move) => {
     if (!movesByDirection[move.direction]) {
@@ -337,13 +330,10 @@ function getPiecePath(
     movesByDirection[move.direction].push(move);
   });
 
-  // Process each direction
   for (const [direction, dirMoves] of Object.entries(movesByDirection)) {
-    // Sort moves by steps to check them in order
     const sortedMoves = dirMoves.sort((a, b) => a.steps - b.steps);
 
     for (const move of sortedMoves) {
-      // Check custom rules (like pawn's first move)
       if (move.customRule && !move.customRule(piece)) {
         continue;
       }
@@ -352,7 +342,6 @@ function getPiecePath(
       const newRowIndex = Number(rowNumber) + move.steps * dirModifier.row;
       const newColIndex = columnIndex + move.steps * dirModifier.col;
 
-      // Check bounds
       if (
         newRowIndex < 1 ||
         newRowIndex > 8 ||
@@ -363,60 +352,44 @@ function getPiecePath(
       }
 
       const newColumnLetter = boardLetters[newColIndex];
-      const targetPosition = `${newColumnLetter}${newRowIndex}` as BoardPosition;
+      const targetPosition =
+        `${newColumnLetter}${newRowIndex}` as BoardPosition;
       const targetTile = board.get(targetPosition);
 
-      // Special rules for pawns
       if (pieceName === "pawn") {
         const moveType = move.moveType || "both";
 
         if (moveType === "move") {
-          // Pawns can only move forward to empty squares
           if (targetTile?.piece) {
-            // Can't move forward into any piece
-            break; // Block further moves in this direction
+            break;
           } else {
-            // Empty square - can move there
             validMoves.push({ position: targetPosition });
           }
         } else if (moveType === "capture") {
-          // Pawns can only capture diagonally if there's an enemy piece
           if (targetTile?.piece && targetTile.piece.color !== pieceColor) {
-            // Enemy piece - can capture
             validMoves.push({ position: targetPosition });
           }
-          // If no enemy piece or friendly piece, pawn can't move diagonally
           continue;
         }
       } else {
-        // Normal piece movement rules
-        // Check if there's a piece at the target position
         if (targetTile?.piece) {
-          // Can't land on friendly pieces
           if (targetTile.piece.color === pieceColor) {
-            // Knights can jump but still can't land on friendlies
             if (pieceName === "knight") {
               continue;
             }
-            // For non-knights, block this entire direction
             break;
           } else {
-            // Enemy piece - can capture
             validMoves.push({ position: targetPosition });
-            // For non-knights, can't continue past enemy piece
             if (pieceName !== "knight") {
               break;
             }
           }
         } else {
-          // Empty square - can move there
           validMoves.push({ position: targetPosition });
         }
       }
 
-      // For pieces that need clear paths (non-knights), check intermediate squares
       if (pieceName !== "knight" && move.steps > 1) {
-        // Check all squares between current position and target
         let blocked = false;
         for (let step = 1; step < move.steps; step++) {
           const intermediateRow = Number(rowNumber) + step * dirModifier.row;
@@ -433,18 +406,17 @@ function getPiecePath(
           }
 
           const intermediateColumn = boardLetters[intermediateCol];
-          const intermediatePosition = `${intermediateColumn}${intermediateRow}` as BoardPosition;
+          const intermediatePosition =
+            `${intermediateColumn}${intermediateRow}` as BoardPosition;
           const intermediateTile = board.get(intermediatePosition);
 
           if (intermediateTile?.piece) {
-            // Path is blocked
             blocked = true;
             break;
           }
         }
 
         if (blocked) {
-          // Remove this move and stop checking further moves in this direction
           validMoves.pop();
           break;
         }
@@ -457,9 +429,8 @@ function getPiecePath(
 
 function createBoard(): Board {
   const tileMap = new Map() as Board;
-  const piecesMap = new Map<BoardPosition, Omit<Piece, 'path'>>();
+  const piecesMap = new Map<BoardPosition, Omit<Piece, "path">>();
 
-  // First, create all pieces without paths
   initialPieces.forEach((piece) => {
     const { name, initialPositions } = piece;
     initialPositions.forEach((position) =>
@@ -471,7 +442,6 @@ function createBoard(): Board {
     );
   });
 
-  // Create the board with tiles and pieces (without paths)
   let tileColor: Color | null = null;
   for (let columnIndex = 0; columnIndex < 8; columnIndex++) {
     tileColor = columnIndex % 2 ? (tileColor = "white") : "black";
@@ -482,14 +452,13 @@ function createBoard(): Board {
       const pieceData = piecesMap.get(position);
 
       tileMap.set(position, {
-        piece: pieceData ? { ...pieceData, path: [] } as Piece : undefined,
+        piece: pieceData ? ({ ...pieceData, path: [] } as Piece) : undefined,
         color: tileColor,
       });
       tileColor = tileColor === "black" ? "white" : "black";
     }
   }
 
-  // Now calculate paths with the complete board
   for (const [position, tileData] of tileMap.entries()) {
     if (tileData.piece) {
       tileData.piece.path = getPiecePath(position, tileData.piece, tileMap);
@@ -513,23 +482,24 @@ export const useBoardStore = create<BoardStoreState>((set) => ({
       const destTile = newBoard.get(to);
 
       if (sourceTile?.piece && destTile) {
-        // Move piece to destination and mark it as having moved
         const movedPiece = { ...sourceTile.piece, hasMoved: true };
         newBoard.set(to, {
           ...destTile,
-          piece: movedPiece
+          piece: movedPiece,
         });
 
-        // Clear source tile
         newBoard.set(from, {
           ...sourceTile,
-          piece: undefined
+          piece: undefined,
         });
 
-        // Recalculate paths for all pieces after the move
         for (const [position, tileData] of newBoard.entries()) {
           if (tileData.piece) {
-            tileData.piece.path = getPiecePath(position, tileData.piece, newBoard);
+            tileData.piece.path = getPiecePath(
+              position,
+              tileData.piece,
+              newBoard
+            );
           }
         }
       }
@@ -567,11 +537,6 @@ export const useMetadataStore = create<MetadataStore>(() => ({
 }));
 
 // Store Abstractions
-
-/**
- * useBoard
- * @returns
- */
 export const useBoardMatrix = (): Matrix => {
   const { board } = useBoardStore();
 
