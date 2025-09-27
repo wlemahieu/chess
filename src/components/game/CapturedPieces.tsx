@@ -8,22 +8,22 @@ function CapturedPieces() {
       <h3 className="text-xl font-bold mb-4">Captured Pieces</h3>
 
       <div className="mb-6">
-        <h4 className="font-semibold mb-2">Black's Captures</h4>
+        <h4 className="font-semibold mb-2">White's Captures</h4>
         <div className="flex flex-wrap gap-2">
           {capturedPieces.white.map((_piece, idx) => (
             <div key={idx} className="text-2xl">
-              ○
+              ●
             </div>
           ))}
         </div>
       </div>
 
       <div>
-        <h4 className="font-semibold mb-2">White's Captures</h4>
+        <h4 className="font-semibold mb-2">Black's Captures</h4>
         <div className="flex flex-wrap gap-2">
           {capturedPieces.black.map((_piece, idx) => (
             <div key={idx} className="text-2xl">
-              ●
+              ○
             </div>
           ))}
         </div>
