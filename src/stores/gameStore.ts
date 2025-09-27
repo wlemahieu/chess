@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Color, BoardPosition, Piece } from "./types";
+import type { Color, BoardPosition, Piece, TileData } from "./types";
 import { isKingInCheck, isCheckmate, isStalemate } from "../utils/chessRules";
 
 interface GameState {
@@ -12,7 +12,7 @@ interface GameState {
   promotionPosition: BoardPosition | null;
 
   switchTurn: () => void;
-  updateGameStatus: (board: Map<BoardPosition, any>) => void;
+  updateGameStatus: (board: Map<BoardPosition, TileData>) => void;
   addCapturedPiece: (piece: Piece) => void;
   setPromotionPosition: (position: BoardPosition | null) => void;
   resetGame: () => void;

@@ -1,10 +1,12 @@
 import { create } from "zustand";
 import type { BoardPosition, TileData, Piece, PieceName } from "./types";
 import { createInitialBoard } from "../utils/boardSetup";
+import { getBoardSetup } from "../utils/boardSetupPresets";
 import { getPiecePath } from "../utils/pieceMovement";
-import { wouldMoveLeaveKingInCheck } from "../utils/chessRules";
+import { wouldMoveLeaveKingInCheck, isKingInCheck, isCheckmate } from "../utils/chessRules";
 import { gameStore } from "./gameStore";
 import { playerStore } from "./playerStore";
+import type { BoardSetupMode } from "../stores/uiStore";
 
 type BoardStore = Map<BoardPosition, TileData>;
 
@@ -17,6 +19,7 @@ interface BoardState {
   getPieceAt: (position: BoardPosition) => Piece | undefined;
   getTileAt: (position: BoardPosition) => TileData | undefined;
   resetBoard: () => void;
+  loadSetup: (setupMode: BoardSetupMode) => void;
 }
 
 export const boardStore = create<BoardState>((set, get) => ({
@@ -91,7 +94,21 @@ export const boardStore = create<BoardState>((set, get) => ({
 
     set({ board: newBoard });
     get().updateAllPaths();
+
     gameStore.getState().setPromotionPosition(null);
+
+    // Check if the opponent is in check after promotion
+    const updatedBoard = get().board;
+    const opponentColor = pawn.color === "white" ? "black" : "white";
+
+    if (isKingInCheck(updatedBoard, opponentColor)) {
+      const checkmate = isCheckmate(updatedBoard, opponentColor);
+      gameStore.setState({
+        inCheck: opponentColor,
+        checkmate,
+        stalemate: false
+      });
+    }
   },
 
   updateAllPaths: () => {
@@ -117,5 +134,14 @@ export const boardStore = create<BoardState>((set, get) => ({
 
   resetBoard: () => {
     set({ board: createInitialBoard() });
+  },
+
+  loadSetup: (setupMode) => {
+    const newBoard = getBoardSetup(setupMode);
+    set({ board: newBoard });
+
+    // Reset game state when loading a new setup
+    gameStore.getState().resetGame();
+    playerStore.getState().resetPlayers();
   }
 }));

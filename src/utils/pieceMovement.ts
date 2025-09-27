@@ -88,7 +88,7 @@ function isPathBlocked(
 ): boolean {
   const [columnLetter, rowNumber] = from;
   const startRow = Number(rowNumber);
-  const startCol = BOARD_LETTERS.indexOf(columnLetter as any);
+  const startCol = BOARD_LETTERS.indexOf(columnLetter as typeof BOARD_LETTERS[number]);
 
   for (let step = 1; step < steps; step++) {
     const intermediateRow = startRow + step * dirModifier.row;
@@ -121,7 +121,7 @@ export function getPiecePath(
 
   const [columnLetter, rowNumber] = position;
   const pieceColor = piece.color;
-  const columnIndex = BOARD_LETTERS.indexOf(columnLetter as any);
+  const columnIndex = BOARD_LETTERS.indexOf(columnLetter as typeof BOARD_LETTERS[number]);
   const validMoves: Path = [];
 
   const movesByDirection: Record<string, Move[]> = {};
@@ -132,7 +132,7 @@ export function getPiecePath(
     movesByDirection[move.direction].push(move);
   });
 
-  for (const [_, dirMoves] of Object.entries(movesByDirection)) {
+  for (const dirMoves of Object.values(movesByDirection)) {
     const sortedMoves = dirMoves.sort((a, b) => a.steps - b.steps);
 
     for (const move of sortedMoves) {

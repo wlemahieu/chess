@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import type { BoardPosition } from "./types";
 
+export type PieceDisplayMode = "text" | "regular";
+export type BoardSetupMode = "normal" | "pawn-pre-promotion" | "endgame-practice" | "check-practice";
+
 interface UIState {
   hoveredTile: BoardPosition | null;
   selectedTile: BoardPosition | null;
@@ -9,6 +12,8 @@ interface UIState {
   showOptions: boolean;
   showNameInput: boolean;
   mousePosition: { x: number; y: number };
+  pieceDisplayMode: PieceDisplayMode;
+  boardSetupMode: BoardSetupMode;
 
   setHoveredTile: (tile: BoardPosition | null) => void;
   setSelectedTile: (tile: BoardPosition | null) => void;
@@ -17,6 +22,8 @@ interface UIState {
   setShowOptions: (show: boolean) => void;
   setShowNameInput: (show: boolean) => void;
   setMousePosition: (position: { x: number; y: number }) => void;
+  setPieceDisplayMode: (mode: PieceDisplayMode) => void;
+  setBoardSetupMode: (mode: BoardSetupMode) => void;
   clearSelection: () => void;
 }
 
@@ -24,17 +31,22 @@ export const uiStore = create<UIState>((set) => ({
   hoveredTile: null,
   selectedTile: null,
   draggingPiece: null,
-  showBoardPositions: true,
+  showBoardPositions: false,
   showOptions: false,
   showNameInput: true,
   mousePosition: { x: 0, y: 0 },
+  pieceDisplayMode: "text",
+  boardSetupMode: "normal",
 
   setHoveredTile: (tile) => set({ hoveredTile: tile }),
   setSelectedTile: (tile) => set({ selectedTile: tile }),
   setDraggingPiece: (piece) => set({ draggingPiece: piece }),
-  toggleBoardPositions: () => set(state => ({ showBoardPositions: !state.showBoardPositions })),
+  toggleBoardPositions: () =>
+    set((state) => ({ showBoardPositions: !state.showBoardPositions })),
   setShowOptions: (show) => set({ showOptions: show }),
   setShowNameInput: (show) => set({ showNameInput: show }),
   setMousePosition: (position) => set({ mousePosition: position }),
-  clearSelection: () => set({ selectedTile: null, draggingPiece: null })
+  setPieceDisplayMode: (mode) => set({ pieceDisplayMode: mode }),
+  setBoardSetupMode: (mode) => set({ boardSetupMode: mode }),
+  clearSelection: () => set({ selectedTile: null, draggingPiece: null }),
 }));
