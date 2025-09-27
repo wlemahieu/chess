@@ -10,6 +10,7 @@ type Piece = {
   path: Path;
   hasMoved?: boolean;
 };
+
 type MoveType = "move" | "capture" | "both";
 type Move = {
   direction: string;
@@ -17,19 +18,21 @@ type Move = {
   moveType?: MoveType;
   customRule?: (piece: Piece) => boolean;
 };
+
+export type TileData = { color: Color; piece?: Piece; value?: number };
+
 type BoardLetters = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H";
 type BoardNumbers = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
-type BoardPosition = `${BoardLetters}${BoardNumbers}`;
+export type BoardPosition = `${BoardLetters}${BoardNumbers}`;
 type Board = Map<BoardPosition, TileData>;
+
 type InitialPiece = {
   name: PieceName;
   initialPositions: Array<BoardPosition>;
 };
 type InitialPieces = Array<InitialPiece>;
-type BoardStore = Map<BoardPosition, TileData>;
-export type TileData = { color: Color; piece?: Piece; value?: number };
+
 export type Tile = [BoardPosition, TileData];
-export type { BoardPosition };
 type MatrixColumn = Tile;
 type Matrix = Array<Array<MatrixColumn>>;
 
@@ -330,7 +333,7 @@ function getPiecePath(
     movesByDirection[move.direction].push(move);
   });
 
-  for (const [direction, dirMoves] of Object.entries(movesByDirection)) {
+  for (const [_direction, dirMoves] of Object.entries(movesByDirection)) {
     const sortedMoves = dirMoves.sort((a, b) => a.steps - b.steps);
 
     for (const move of sortedMoves) {
@@ -468,21 +471,53 @@ function createBoard(): Board {
   return tileMap;
 }
 
-interface BoardStoreState {
+type BoardStore = Map<BoardPosition, TileData>;
+type BoardStoreState = {
   board: BoardStore;
+  currentTurn: Color;
+  capturedPieces: { white: Piece[]; black: Piece[] };
+  showBoardPositions: boolean;
+  promotionPosition: BoardPosition | null;
   movePiece: (from: BoardPosition, to: BoardPosition) => void;
-}
+  toggleBoardPositions: () => void;
+  promotePawn: (position: BoardPosition, newPiece: Piece) => void;
+};
 
 export const useBoardStore = create<BoardStoreState>((set) => ({
   board: createBoard(),
+  currentTurn: "white",
+  capturedPieces: { white: [], black: [] },
+  showBoardPositions: true,
+  promotionPosition: null,
   movePiece: (from: BoardPosition, to: BoardPosition) => {
     set((state) => {
       const newBoard = new Map(state.board) as BoardStore;
       const sourceTile = newBoard.get(from);
       const destTile = newBoard.get(to);
 
-      if (sourceTile?.piece && destTile) {
+      if (
+        sourceTile?.piece &&
+        destTile &&
+        sourceTile.piece.color === state.currentTurn
+      ) {
         const movedPiece = { ...sourceTile.piece, hasMoved: true };
+
+        const newCapturedPieces = { ...state.capturedPieces };
+        if (destTile.piece) {
+          const capturedPiece = destTile.piece;
+          if (capturedPiece.color === "white") {
+            newCapturedPieces.white = [
+              ...newCapturedPieces.white,
+              capturedPiece,
+            ];
+          } else {
+            newCapturedPieces.black = [
+              ...newCapturedPieces.black,
+              capturedPiece,
+            ];
+          }
+        }
+
         newBoard.set(to, {
           ...destTile,
           piece: movedPiece,
@@ -502,9 +537,90 @@ export const useBoardStore = create<BoardStoreState>((set) => ({
             );
           }
         }
+
+        const isPawnPromotion =
+          movedPiece.name === "pawn" &&
+          ((movedPiece.color === "white" && to.includes("8")) ||
+            (movedPiece.color === "black" && to.includes("1")));
+
+        const capturedByColor =
+          movedPiece.color === "white"
+            ? newCapturedPieces.black
+            : newCapturedPieces.white;
+
+        if (isPawnPromotion && capturedByColor.length > 0) {
+          return {
+            board: newBoard,
+            currentTurn: state.currentTurn,
+            capturedPieces: newCapturedPieces,
+            promotionPosition: to,
+          };
+        }
+
+        return {
+          board: newBoard,
+          currentTurn: state.currentTurn === "white" ? "black" : "white",
+          capturedPieces: newCapturedPieces,
+          promotionPosition: null,
+        };
       }
 
-      return { board: newBoard };
+      return state;
+    });
+  },
+  toggleBoardPositions: () => {
+    set((state) => ({ showBoardPositions: !state.showBoardPositions }));
+  },
+  promotePawn: (position: BoardPosition, newPiece: Piece) => {
+    set((state) => {
+      const newBoard = new Map(state.board) as BoardStore;
+      const tile = newBoard.get(position);
+
+      if (tile) {
+        newBoard.set(position, {
+          ...tile,
+          piece: { ...newPiece, hasMoved: true, path: [] },
+        });
+
+        const newCapturedPieces = { ...state.capturedPieces };
+        const capturedArray =
+          newPiece.color === "white"
+            ? newCapturedPieces.black
+            : newCapturedPieces.white;
+
+        const index = capturedArray.findIndex(
+          (p) => p.name === newPiece.name && p.color === newPiece.color
+        );
+
+        if (index > -1) {
+          if (newPiece.color === "white") {
+            newCapturedPieces.black = [
+              ...capturedArray.slice(0, index),
+              ...capturedArray.slice(index + 1),
+            ];
+          } else {
+            newCapturedPieces.white = [
+              ...capturedArray.slice(0, index),
+              ...capturedArray.slice(index + 1),
+            ];
+          }
+        }
+
+        for (const [pos, tileData] of newBoard.entries()) {
+          if (tileData.piece) {
+            tileData.piece.path = getPiecePath(pos, tileData.piece, newBoard);
+          }
+        }
+
+        return {
+          board: newBoard,
+          currentTurn: state.currentTurn === "white" ? "black" : "white",
+          capturedPieces: newCapturedPieces,
+          promotionPosition: null,
+        };
+      }
+
+      return state;
     });
   },
 }));
@@ -515,25 +631,31 @@ type Player = {
   moves: number;
 };
 type Players = [Player, Player];
-type MetadataStore = {
+interface MetadataStore {
   players: Players;
-  turn: Color;
-};
+  setPlayerName: (color: Color, name: string) => void;
+}
 
-export const useMetadataStore = create<MetadataStore>(() => ({
+export const useMetadataStore = create<MetadataStore>((set) => ({
   players: [
     {
-      name: "",
-      color: "black",
-      moves: 0,
-    },
-    {
-      name: "",
+      name: "Player 1",
       color: "white",
       moves: 0,
     },
+    {
+      name: "Player 2",
+      color: "black",
+      moves: 0,
+    },
   ],
-  turn: "white",
+  setPlayerName: (color: Color, name: string) => {
+    set((state) => ({
+      players: state.players.map((p) =>
+        p.color === color ? { ...p, name } : p
+      ) as Players,
+    }));
+  },
 }));
 
 // Store Abstractions

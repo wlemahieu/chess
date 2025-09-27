@@ -9,6 +9,7 @@ import type { Mesh } from "three";
 import {
   useBoardMatrix,
   useBoardStore,
+  useMetadataStore,
   type Tile,
   type BoardPosition,
   type TileData,
@@ -64,8 +65,18 @@ type TileProps = {
   onHover: (tileKey: string | null) => void;
   onClick: (tileKey: string) => void;
   isSelected: boolean;
+  showBoardPositions: boolean;
+  currentTurn: string;
 };
-function Tile({ tile, isValidMove, onHover, onClick, isSelected }: TileProps) {
+function Tile({
+  tile,
+  isValidMove,
+  onHover,
+  onClick,
+  isSelected,
+  showBoardPositions,
+  currentTurn,
+}: TileProps) {
   const [tileKey, tileData] = tile;
 
   return (
@@ -78,11 +89,19 @@ function Tile({ tile, isValidMove, onHover, onClick, isSelected }: TileProps) {
         isValidMove && "bg-pink-400",
         isSelected && "ring-4 ring-yellow-400"
       )}
-      onMouseEnter={() => tileData?.piece && onHover(tileKey)}
+      onMouseEnter={() =>
+        tileData?.piece &&
+        tileData.piece.color === currentTurn &&
+        onHover(tileKey)
+      }
       onMouseLeave={() => onHover(null)}
       onClick={() => onClick(tileKey)}
     >
-      <span className="absolute bottom-1 left-1 text-xs italic">{tileKey}</span>
+      {showBoardPositions && (
+        <span className="absolute bottom-1 left-1 text-xs italic">
+          {tileKey}
+        </span>
+      )}
       {tileData?.piece && (
         <div className="flex flex-col items-center">
           <span className="text-lg font-semibold">{tileData.piece.name}</span>
@@ -101,7 +120,17 @@ function Tile({ tile, isValidMove, onHover, onClick, isSelected }: TileProps) {
 }
 function App() {
   const matrix = useBoardMatrix();
-  const { board, movePiece } = useBoardStore();
+  const {
+    board,
+    movePiece,
+    currentTurn,
+    capturedPieces,
+    showBoardPositions,
+    toggleBoardPositions,
+    promotionPosition,
+    promotePawn,
+  } = useBoardStore();
+  const { players, setPlayerName } = useMetadataStore();
   const [hoveredTile, setHoveredTile] = useState<string | null>(null);
   const [selectedTile, setSelectedTile] = useState<string | null>(null);
   const [draggingPiece, setDraggingPiece] = useState<{
@@ -109,6 +138,8 @@ function App() {
     color: string;
   } | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [showOptions, setShowOptions] = useState(false);
+  const [showNameInput, setShowNameInput] = useState(true);
 
   // Track mouse position for dragging cursor
   useEffect(() => {
@@ -126,15 +157,15 @@ function App() {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('.chess-board')) {
+      if (!target.closest(".chess-board")) {
         setSelectedTile(null);
         setDraggingPiece(null);
       }
     };
 
     if (selectedTile) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
     }
   }, [selectedTile]);
 
@@ -152,7 +183,6 @@ function App() {
   const handleTileClick = (tileKey: string) => {
     const clickedTileData = board.get(tileKey as BoardPosition);
 
-    // If clicking the same selected tile, deselect it
     if (selectedTile === tileKey) {
       setSelectedTile(null);
       setDraggingPiece(null);
@@ -160,28 +190,132 @@ function App() {
     }
 
     if (selectedTile && validMoves.has(tileKey)) {
-      // Move the piece using the store action
       movePiece(selectedTile as BoardPosition, tileKey as BoardPosition);
-
-      // Clear selection
       setSelectedTile(null);
       setDraggingPiece(null);
-    } else if (clickedTileData?.piece) {
-      // Select a piece
+    } else if (
+      clickedTileData?.piece &&
+      clickedTileData.piece.color === currentTurn
+    ) {
       setSelectedTile(tileKey);
       setDraggingPiece({
         name: clickedTileData.piece.name,
         color: clickedTileData.piece.color,
       });
     } else {
-      // Deselect when clicking empty tile
       setSelectedTile(null);
       setDraggingPiece(null);
     }
   };
 
+  const currentPlayer = players.find((p) => p.color === currentTurn);
+
+  if (showNameInput) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold mb-6">Enter Player Names</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                White Player
+              </label>
+              <input
+                type="text"
+                defaultValue={players[0].name}
+                onChange={(e) => setPlayerName("white", e.target.value)}
+                className="w-full px-3 py-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Black Player
+              </label>
+              <input
+                type="text"
+                defaultValue={players[1].name}
+                onChange={(e) => setPlayerName("black", e.target.value)}
+                className="w-full px-3 py-2 border rounded"
+              />
+            </div>
+            <button
+              onClick={() => setShowNameInput(false)}
+              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            >
+              Start Game
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const promotingPiece = promotionPosition
+    ? board.get(promotionPosition)?.piece
+    : null;
+  const availableForPromotion = promotingPiece
+    ? promotingPiece.color === "white"
+      ? capturedPieces.black
+      : capturedPieces.white
+    : [];
+
   return (
-    <div className="border-6 border-black h-full relative">
+    <div className="flex h-screen bg-gray-100 relative">
+      {promotionPosition && availableForPromotion.length > 0 && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4">
+              Choose a piece to revive:
+            </h2>
+            <div className="grid grid-cols-3 gap-4">
+              {availableForPromotion.map((piece, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    const revivePiece = {
+                      ...piece,
+                      color: promotingPiece!.color,
+                    };
+                    promotePawn(promotionPosition, revivePiece);
+                  }}
+                  className="p-4 border rounded hover:bg-gray-200 flex flex-col items-center"
+                >
+                  <span className="text-lg font-semibold capitalize">
+                    {piece.name}
+                  </span>
+                  <span className="text-2xl">
+                    {piece.color === "white" ? "○" : "●"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showOptions && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4">Options</h2>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={showBoardPositions}
+                onChange={toggleBoardPositions}
+                className="form-checkbox"
+              />
+              <span>Show board positions</span>
+            </label>
+            <button
+              onClick={() => setShowOptions(false)}
+              className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {draggingPiece && (
         <div
           className="fixed pointer-events-none z-50 bg-white px-2 py-1 rounded shadow-lg border border-gray-400"
@@ -197,29 +331,75 @@ function App() {
         </div>
       )}
 
-      <div className="chess-board flex w-[800px]">
-        {matrix.map((letterColumn, columnIndex) => {
-          return (
-            <div
-              key={`column-${columnIndex}`}
-              className="flex flex-col w-[100px]"
-            >
-              {letterColumn.map((tile, tileIndex) => {
-                const [tileKey] = tile;
-                return (
-                  <Tile
-                    key={`column-${columnIndex}-tile-${tileIndex}`}
-                    tile={tile}
-                    isValidMove={validMoves.has(tileKey)}
-                    onHover={setHoveredTile}
-                    onClick={handleTileClick}
-                    isSelected={selectedTile === tileKey}
-                  />
-                );
-              })}
-            </div>
-          );
-        })}
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="mb-4 bg-white px-6 py-3 rounded-lg shadow">
+          <h2 className="text-2xl font-bold">
+            {currentPlayer?.name}'s Turn
+            <span className="ml-2 text-lg">
+              ({currentTurn === "black" ? "●" : "○"})
+            </span>
+          </h2>
+        </div>
+
+        <div className="chess-board flex w-[800px] shadow-xl">
+          {matrix.map((letterColumn, columnIndex) => {
+            return (
+              <div
+                key={`column-${columnIndex}`}
+                className="flex flex-col w-[100px]"
+              >
+                {letterColumn.map((tile, tileIndex) => {
+                  const [tileKey] = tile;
+                  return (
+                    <Tile
+                      key={`column-${columnIndex}-tile-${tileIndex}`}
+                      tile={tile}
+                      isValidMove={validMoves.has(tileKey)}
+                      onHover={setHoveredTile}
+                      onClick={handleTileClick}
+                      isSelected={selectedTile === tileKey}
+                      showBoardPositions={showBoardPositions}
+                      currentTurn={currentTurn}
+                    />
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          onClick={() => setShowOptions(true)}
+          className="mt-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+        >
+          Options
+        </button>
+      </div>
+
+      <div className="w-64 bg-white shadow-lg p-4">
+        <h3 className="text-xl font-bold mb-4">Captured Pieces</h3>
+
+        <div className="mb-6">
+          <h4 className="font-semibold mb-2">Black's Captures</h4>
+          <div className="flex flex-wrap gap-2">
+            {capturedPieces.white.map((_piece, idx) => (
+              <div key={idx} className="text-2xl">
+                ○
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-semibold mb-2">White's Captures</h4>
+          <div className="flex flex-wrap gap-2">
+            {capturedPieces.black.map((_piece, idx) => (
+              <div key={idx} className="text-2xl">
+                ●
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
