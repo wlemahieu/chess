@@ -19,8 +19,9 @@ type InitialPiece = {
 };
 type InitialPieces = Array<InitialPiece>;
 type BoardStore = Map<BoardPosition, TileData>;
-type TileData = { color: Color; piece: Piece; value: number };
+export type TileData = { color: Color; piece?: Piece; value?: number };
 export type Tile = [BoardPosition, TileData];
+export type { BoardPosition };
 type MatrixColumn = Tile;
 type Matrix = Array<Array<MatrixColumn>>;
 
@@ -199,7 +200,37 @@ function createBoard(): Board {
   return tileMap;
 }
 
-export const useBoardStore = create<BoardStore>(createBoard);
+interface BoardStoreState {
+  board: BoardStore;
+  movePiece: (from: BoardPosition, to: BoardPosition) => void;
+}
+
+export const useBoardStore = create<BoardStoreState>((set) => ({
+  board: createBoard(),
+  movePiece: (from: BoardPosition, to: BoardPosition) => {
+    set((state) => {
+      const newBoard = new Map(state.board) as BoardStore;
+      const sourceTile = newBoard.get(from);
+      const destTile = newBoard.get(to);
+
+      if (sourceTile?.piece && destTile) {
+        // Move piece to destination
+        newBoard.set(to, {
+          ...destTile,
+          piece: sourceTile.piece
+        });
+
+        // Clear source tile
+        newBoard.set(from, {
+          ...sourceTile,
+          piece: undefined
+        });
+      }
+
+      return { board: newBoard };
+    });
+  },
+}));
 
 type Player = {
   name: string;
@@ -235,7 +266,7 @@ export const useMetadataStore = create<MetadataStore>(() => ({
  * @returns
  */
 export const useBoardMatrix = (): Matrix => {
-  const board = useBoardStore();
+  const { board } = useBoardStore();
 
   const entries: Array<MatrixColumn> = useMemo(() => {
     return Array.from(board.entries());
