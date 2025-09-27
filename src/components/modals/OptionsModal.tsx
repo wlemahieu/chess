@@ -1,11 +1,10 @@
-import React from "react";
 import { uiStore } from "../../stores/uiStore";
 
 function OptionsModal() {
-  const showOptions = uiStore(state => state.showOptions);
-  const showBoardPositions = uiStore(state => state.showBoardPositions);
-  const toggleBoardPositions = uiStore(state => state.toggleBoardPositions);
-  const setShowOptions = uiStore(state => state.setShowOptions);
+  const showOptions = uiStore((state) => state.showOptions);
+  const showBoardPositions = uiStore((state) => state.showBoardPositions);
+  const toggleBoardPositions = uiStore((state) => state.toggleBoardPositions);
+  const setShowOptions = uiStore((state) => state.setShowOptions);
 
   if (!showOptions) return null;
 

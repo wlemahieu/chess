@@ -1,12 +1,11 @@
-import React from "react";
 import { gameStore } from "../../stores/gameStore";
 import { playerStore } from "../../stores/playerStore";
 
 function GameEndModal() {
-  const checkmate = gameStore(state => state.checkmate);
-  const stalemate = gameStore(state => state.stalemate);
-  const currentTurn = gameStore(state => state.currentTurn);
-  const players = playerStore(state => state.players);
+  const checkmate = gameStore((state) => state.checkmate);
+  const stalemate = gameStore((state) => state.stalemate);
+  const currentTurn = gameStore((state) => state.currentTurn);
+  const players = playerStore((state) => state.players);
 
   if (!checkmate && !stalemate) return null;
 

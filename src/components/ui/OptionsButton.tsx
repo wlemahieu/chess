@@ -1,8 +1,7 @@
-import React from "react";
 import { uiStore } from "../../stores/uiStore";
 
 function OptionsButton() {
-  const setShowOptions = uiStore(state => state.setShowOptions);
+  const setShowOptions = uiStore((state) => state.setShowOptions);
 
   return (
     <button

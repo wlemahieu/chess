@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 import { twMerge } from "tailwind-merge";
 import type { Piece } from "../../stores/types";
 
@@ -22,4 +22,4 @@ function PieceDisplay({ piece }: PieceDisplayProps) {
   );
 }
 
-export default React.memo(PieceDisplay);
+export default memo(PieceDisplay);

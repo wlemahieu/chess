@@ -1,11 +1,10 @@
-import React from "react";
 import { playerStore } from "../../stores/playerStore";
 import { uiStore } from "../../stores/uiStore";
 
 function PlayerNameInput() {
-  const players = playerStore(state => state.players);
-  const setPlayerName = playerStore(state => state.setPlayerName);
-  const setShowNameInput = uiStore(state => state.setShowNameInput);
+  const players = playerStore((state) => state.players);
+  const setPlayerName = playerStore((state) => state.setPlayerName);
+  const setShowNameInput = uiStore((state) => state.setShowNameInput);
 
   const handleStartGame = () => {
     setShowNameInput(false);

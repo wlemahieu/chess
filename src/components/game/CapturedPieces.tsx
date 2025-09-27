@@ -1,8 +1,7 @@
-import React from "react";
 import { gameStore } from "../../stores/gameStore";
 
 function CapturedPieces() {
-  const capturedPieces = gameStore(state => state.capturedPieces);
+  const capturedPieces = gameStore((state) => state.capturedPieces);
 
   return (
     <div className="w-64 bg-white shadow-lg p-4">

@@ -1,4 +1,3 @@
-import React from "react";
 import { uiStore } from "../stores/uiStore";
 import ChessBoard from "./board/ChessBoard";
 import GameStatus from "./game/GameStatus";
@@ -11,7 +10,7 @@ import DraggingCursor from "./ui/DraggingCursor";
 import OptionsButton from "./ui/OptionsButton";
 
 function Game() {
-  const showNameInput = uiStore(state => state.showNameInput);
+  const showNameInput = uiStore((state) => state.showNameInput);
 
   if (showNameInput) {
     return <PlayerNameInput />;
