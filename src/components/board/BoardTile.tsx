@@ -20,6 +20,8 @@ function BoardTile({
 }: BoardTileProps) {
   const currentTurn = gameStore((state) => state.currentTurn);
   const showBoardPositions = uiStore((state) => state.showBoardPositions);
+  const showTileHover = uiStore((state) => state.showTileHover);
+  const showMovePaths = uiStore((state) => state.showMovePaths);
   const setHoveredTile = uiStore((state) => state.setHoveredTile);
   const selectedTile = uiStore((state) => state.selectedTile);
   const setSelectedTile = uiStore((state) => state.setSelectedTile);
@@ -61,12 +63,13 @@ function BoardTile({
   return (
     <div
       className={twMerge(
-        "w-[100px] h-[100px] relative hover:bg-blue-500 flex items-center justify-center cursor-pointer",
+        "w-[100px] h-[100px] relative flex items-center justify-center cursor-pointer",
+        showTileHover && "hover:bg-blue-500 hover:z-10",
         tileData?.color === "black"
           ? "bg-gray-700 text-gray-100"
           : "bg-gray-300 text-gray-900",
-        isValidMove && "bg-pink-400",
-        isSelected && "ring-4 ring-yellow-400"
+        isValidMove && showMovePaths && "bg-pink-400",
+        isSelected && "ring-4 ring-yellow-400 z-20"
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { PieceName } from "../../stores/types";
 import { gameStore } from "../../stores/gameStore";
 import { boardStore } from "../../stores/boardStore";
+import Modal from "./Modal";
 
 function PawnPromotionModal() {
   const promotionPosition = gameStore((state) => state.promotionPosition);
@@ -21,30 +22,26 @@ function PawnPromotionModal() {
     }
   };
 
-  if (!promotionPosition) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Promote pawn to:</h2>
-        <div className="grid grid-cols-2 gap-4">
-          {promotionOptions.map((pieceName) => (
-            <button
-              key={pieceName}
-              onClick={() => handlePromote(pieceName)}
-              className="p-4 border rounded hover:bg-gray-200 flex flex-col items-center"
-            >
-              <span className="text-lg font-semibold capitalize">
-                {pieceName}
-              </span>
-              <span className="text-2xl">
-                {promotingPiece?.color === "white" ? "○" : "●"}
-              </span>
-            </button>
-          ))}
-        </div>
+    <Modal isOpen={!!promotionPosition}>
+      <h2 className="text-xl font-bold mb-4">Promote pawn to:</h2>
+      <div className="grid grid-cols-2 gap-4">
+        {promotionOptions.map((pieceName) => (
+          <button
+            key={pieceName}
+            onClick={() => handlePromote(pieceName)}
+            className="p-4 border rounded hover:bg-gray-200 flex flex-col items-center"
+          >
+            <span className="text-lg font-semibold capitalize">
+              {pieceName}
+            </span>
+            <span className="text-2xl">
+              {promotingPiece?.color === "white" ? "○" : "●"}
+            </span>
+          </button>
+        ))}
       </div>
-    </div>
+    </Modal>
   );
 }
 

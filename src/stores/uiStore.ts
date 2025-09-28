@@ -14,6 +14,8 @@ interface UIState {
   mousePosition: { x: number; y: number };
   pieceDisplayMode: PieceDisplayMode;
   boardSetupMode: BoardSetupMode;
+  showTileHover: boolean;
+  showMovePaths: boolean;
 
   setHoveredTile: (tile: BoardPosition | null) => void;
   setSelectedTile: (tile: BoardPosition | null) => void;
@@ -24,6 +26,8 @@ interface UIState {
   setMousePosition: (position: { x: number; y: number }) => void;
   setPieceDisplayMode: (mode: PieceDisplayMode) => void;
   setBoardSetupMode: (mode: BoardSetupMode) => void;
+  toggleTileHover: () => void;
+  toggleMovePaths: () => void;
   clearSelection: () => void;
 }
 
@@ -37,6 +41,8 @@ export const uiStore = create<UIState>((set) => ({
   mousePosition: { x: 0, y: 0 },
   pieceDisplayMode: "text",
   boardSetupMode: "normal",
+  showTileHover: false,
+  showMovePaths: false,
 
   setHoveredTile: (tile) => set({ hoveredTile: tile }),
   setSelectedTile: (tile) => set({ selectedTile: tile }),
@@ -48,5 +54,9 @@ export const uiStore = create<UIState>((set) => ({
   setMousePosition: (position) => set({ mousePosition: position }),
   setPieceDisplayMode: (mode) => set({ pieceDisplayMode: mode }),
   setBoardSetupMode: (mode) => set({ boardSetupMode: mode }),
+  toggleTileHover: () =>
+    set((state) => ({ showTileHover: !state.showTileHover })),
+  toggleMovePaths: () =>
+    set((state) => ({ showMovePaths: !state.showMovePaths })),
   clearSelection: () => set({ selectedTile: null, draggingPiece: null }),
 }));

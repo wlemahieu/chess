@@ -8,6 +8,7 @@ import PawnPromotionModal from "./modals/PawnPromotionModal";
 import OptionsModal from "./modals/OptionsModal";
 import DraggingCursor from "./ui/DraggingCursor";
 import OptionsButton from "./ui/OptionsButton";
+import TurnIndicator from "./ui/TurnIndicator";
 
 function Game() {
   const showNameInput = uiStore((state) => state.showNameInput);
@@ -22,6 +23,7 @@ function Game() {
       <PawnPromotionModal />
       <OptionsModal />
       <DraggingCursor />
+      <TurnIndicator />
 
       <div className="flex-1 flex flex-col items-center justify-center">
         <GameStatus />
