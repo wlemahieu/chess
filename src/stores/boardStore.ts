@@ -97,7 +97,6 @@ export const boardStore = create<BoardState>((set, get) => ({
 
     gameStore.getState().setPromotionPosition(null);
 
-    // Check if the opponent is in check after promotion
     const updatedBoard = get().board;
     const opponentColor = pawn.color === "white" ? "black" : "white";
 
@@ -140,7 +139,6 @@ export const boardStore = create<BoardState>((set, get) => ({
     const newBoard = getBoardSetup(setupMode);
     set({ board: newBoard });
 
-    // Reset game state when loading a new setup
     gameStore.getState().resetGame();
     playerStore.getState().resetPlayers();
   }

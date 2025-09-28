@@ -5,7 +5,6 @@ function TurnIndicator() {
 
   return (
     <>
-      {/* Black's turn indicator - top left */}
       <div
         className={`fixed left-8 top-1/4 transform -translate-y-1/2 transition-all duration-300 ${
           currentTurn === "black" ? "opacity-100 scale-100" : "opacity-0 scale-75"
@@ -34,7 +33,6 @@ function TurnIndicator() {
         </div>
       </div>
 
-      {/* White's turn indicator - bottom left */}
       <div
         className={`fixed left-8 bottom-1/4 transform translate-y-1/2 transition-all duration-300 ${
           currentTurn === "white" ? "opacity-100 scale-100" : "opacity-0 scale-75"

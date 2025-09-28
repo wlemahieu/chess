@@ -51,38 +51,49 @@ function setPiece(
 function createPawnPrePromotionSetup(): BoardStore {
   const board = createEmptyBoard();
 
-  // White pieces
-  setPiece(board, "e1", createPiece("king", "white", true));
-  setPiece(board, "a1", createPiece("rook", "white"));
-  setPiece(board, "h1", createPiece("rook", "white"));
+  const setupWhitePieces = () => {
+    setPiece(board, "e1", createPiece("king", "white", true));
+    setPiece(board, "a1", createPiece("rook", "white"));
+    setPiece(board, "h1", createPiece("rook", "white"));
+    setPiece(board, "c1", createPiece("bishop", "white"));
+    setPiece(board, "f1", createPiece("bishop", "white"));
+  };
 
-  // White pawn one move from promotion - next to where black king will be
-  setPiece(board, "d7", createPiece("pawn", "white", true));
+  const setupWhitePromotionPawn = () => {
+    setPiece(board, "d7", createPiece("pawn", "white", true));
+  };
 
-  // Some other white pawns
-  setPiece(board, "a2", createPiece("pawn", "white"));
-  setPiece(board, "b2", createPiece("pawn", "white"));
-  setPiece(board, "g2", createPiece("pawn", "white"));
-  setPiece(board, "h2", createPiece("pawn", "white"));
+  const setupWhitePawns = () => {
+    setPiece(board, "a2", createPiece("pawn", "white"));
+    setPiece(board, "b2", createPiece("pawn", "white"));
+    setPiece(board, "g2", createPiece("pawn", "white"));
+    setPiece(board, "h2", createPiece("pawn", "white"));
+  };
 
-  // Black king positioned next to where the pawn will promote
-  setPiece(board, "e8", createPiece("king", "black", true));
+  const setupBlackKingForPromotion = () => {
+    setPiece(board, "e8", createPiece("king", "black", true));
+  };
 
-  // Black pieces - positioned away from the promotion square
-  setPiece(board, "a8", createPiece("rook", "black"));
-  setPiece(board, "h8", createPiece("rook", "black"));
-  setPiece(board, "b8", createPiece("knight", "black"));
+  const setupBlackPieces = () => {
+    setPiece(board, "a8", createPiece("rook", "black"));
+    setPiece(board, "h8", createPiece("rook", "black"));
+    setPiece(board, "b8", createPiece("knight", "black"));
+    setPiece(board, "c8", createPiece("bishop", "black"));
+  };
 
-  // Black pawns - keeping some protection around the king
-  setPiece(board, "f7", createPiece("pawn", "black"));
-  setPiece(board, "g7", createPiece("pawn", "black"));
-  setPiece(board, "h7", createPiece("pawn", "black"));
-  setPiece(board, "a7", createPiece("pawn", "black"));
+  const setupBlackDefensivePawns = () => {
+    setPiece(board, "f7", createPiece("pawn", "black"));
+    setPiece(board, "g7", createPiece("pawn", "black"));
+    setPiece(board, "h7", createPiece("pawn", "black"));
+    setPiece(board, "a7", createPiece("pawn", "black"));
+  };
 
-  // Add some bishops
-  setPiece(board, "c1", createPiece("bishop", "white"));
-  setPiece(board, "f1", createPiece("bishop", "white"));
-  setPiece(board, "c8", createPiece("bishop", "black"));
+  setupWhitePieces();
+  setupWhitePromotionPawn();
+  setupWhitePawns();
+  setupBlackKingForPromotion();
+  setupBlackPieces();
+  setupBlackDefensivePawns();
 
   return board;
 }
@@ -90,13 +101,16 @@ function createPawnPrePromotionSetup(): BoardStore {
 function createEndgamePracticeSetup(): BoardStore {
   const board = createEmptyBoard();
 
-  // Minimal endgame setup
-  setPiece(board, "e1", createPiece("king", "white", true));
-  setPiece(board, "d2", createPiece("queen", "white", true));
-  setPiece(board, "a1", createPiece("rook", "white", true));
+  const setupMinimalEndgamePieces = () => {
+    setPiece(board, "e1", createPiece("king", "white", true));
+    setPiece(board, "d2", createPiece("queen", "white", true));
+    setPiece(board, "a1", createPiece("rook", "white", true));
 
-  setPiece(board, "e8", createPiece("king", "black", true));
-  setPiece(board, "h8", createPiece("rook", "black", true));
+    setPiece(board, "e8", createPiece("king", "black", true));
+    setPiece(board, "h8", createPiece("rook", "black", true));
+  };
+
+  setupMinimalEndgamePieces();
   setPiece(board, "b7", createPiece("pawn", "black", true));
   setPiece(board, "c7", createPiece("pawn", "black", true));
 
@@ -106,20 +120,25 @@ function createEndgamePracticeSetup(): BoardStore {
 function createCheckPracticeSetup(): BoardStore {
   const board = createEmptyBoard();
 
-  // Setup where white can easily check black
-  setPiece(board, "e1", createPiece("king", "white", true));
-  setPiece(board, "d1", createPiece("queen", "white"));
-  setPiece(board, "a1", createPiece("rook", "white"));
-  setPiece(board, "h1", createPiece("rook", "white"));
-  setPiece(board, "c1", createPiece("bishop", "white"));
-  setPiece(board, "f1", createPiece("bishop", "white"));
+  const setupWhiteAttackPieces = () => {
+    setPiece(board, "e1", createPiece("king", "white", true));
+    setPiece(board, "d1", createPiece("queen", "white"));
+    setPiece(board, "a1", createPiece("rook", "white"));
+    setPiece(board, "h1", createPiece("rook", "white"));
+    setPiece(board, "c1", createPiece("bishop", "white"));
+    setPiece(board, "f1", createPiece("bishop", "white"));
+  };
 
-  // Black king in a vulnerable position
-  setPiece(board, "e8", createPiece("king", "black", true));
-  setPiece(board, "f7", createPiece("pawn", "black", true));
-  setPiece(board, "g7", createPiece("pawn", "black"));
-  setPiece(board, "h7", createPiece("pawn", "black"));
-  setPiece(board, "a8", createPiece("rook", "black"));
+  const setupVulnerableBlackKing = () => {
+    setPiece(board, "e8", createPiece("king", "black", true));
+    setPiece(board, "f7", createPiece("pawn", "black", true));
+    setPiece(board, "g7", createPiece("pawn", "black"));
+    setPiece(board, "h7", createPiece("pawn", "black"));
+    setPiece(board, "a8", createPiece("rook", "black"));
+  };
+
+  setupWhiteAttackPieces();
+  setupVulnerableBlackKing();
 
   return board;
 }
@@ -143,7 +162,6 @@ export function getBoardSetup(setupMode: BoardSetupMode): BoardStore {
       break;
   }
 
-  // Update all piece paths after setting up the board
   for (const [position, tileData] of board.entries()) {
     if (tileData.piece) {
       tileData.piece.path = getPiecePath(position, tileData.piece, board);
