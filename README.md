@@ -1,5 +1,7 @@
 # Chess Game - React TypeScript Application
 
+🎮 **[Play the Live Demo Here!](https://chess-117183803177.us-west1.run.app/)**
+
 A fully-featured chess game built with React, TypeScript, and Zustand for state management. This application implements complete chess rules including check, checkmate, stalemate, and special moves like pawn promotion.
 
 ## 🏗️ Architecture Overview
