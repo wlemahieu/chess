@@ -135,9 +135,9 @@ export default function Navigation() {
             isMinimized ? "text-xs" : "text-sm md:text-base"
           }`}
         >
-          Chess{" "}
+          RDY
           <span className="text-xs text-gray-400 dark:text-gray-500 italic">
-            by Wes
+            Chess
           </span>
         </h1>
         <GameStatus />
