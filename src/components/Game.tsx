@@ -7,32 +7,37 @@ import GameEndModal from "./modals/GameEndModal";
 import PawnPromotionModal from "./modals/PawnPromotionModal";
 import OptionsModal from "./modals/OptionsModal";
 import DraggingCursor from "./ui/DraggingCursor";
-import OptionsButton from "./ui/OptionsButton";
 import TurnIndicator from "./ui/TurnIndicator";
+import Navigation from "./ui/Navigation";
+import ScreenSizeWarning from "./ui/ScreenSizeWarning";
 
 function Game() {
   const showNameInput = uiStore((state) => state.showNameInput);
 
-  if (showNameInput) {
-    return <PlayerNameInput />;
-  }
-
   return (
-    <div className="flex h-screen bg-gray-100 relative">
-      <GameEndModal />
-      <PawnPromotionModal />
-      <OptionsModal />
-      <DraggingCursor />
-      <TurnIndicator />
+    <>
+      <Navigation />
+      {showNameInput ? (
+        <PlayerNameInput />
+      ) : (
+        <ScreenSizeWarning>
+          <div className="flex h-screen bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
+            <GameEndModal />
+            <PawnPromotionModal />
+            <OptionsModal />
+            <DraggingCursor />
+            <TurnIndicator />
 
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <GameStatus />
-        <ChessBoard />
-        <OptionsButton />
-      </div>
+            <div className="flex-1 flex flex-col items-center justify-center pt-16">
+              <GameStatus />
+              <ChessBoard />
+            </div>
 
-      <CapturedPieces />
-    </div>
+            <CapturedPieces />
+          </div>
+        </ScreenSizeWarning>
+      )}
+    </>
   );
 }
 

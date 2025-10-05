@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 html,
 body,
 #root {
   height: 100%;
   margin: unset;
   width: 100%;
-  background-color: darkgrey;
 }

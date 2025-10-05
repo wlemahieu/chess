@@ -7,6 +7,7 @@ import {
 } from "react-router";
 import type { LinksFunction } from "react-router";
 import appStylesHref from "./app.css?url";
+import { ThemeProvider } from "../src/contexts/ThemeContext";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: appStylesHref },
@@ -22,7 +23,9 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Outlet />
+        <ThemeProvider>
+          <Outlet />
+        </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
