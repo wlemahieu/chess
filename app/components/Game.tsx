@@ -1,4 +1,4 @@
-import { uiStore } from "~/stores/uiStore";
+import { useUIStore } from "~/stores/uiStore";
 import ChessBoard from "~/components/board/ChessBoard";
 import GameStatus from "~/components/game/GameStatus";
 import CapturedPieces from "~/components/game/CapturedPieces";
@@ -12,7 +12,7 @@ import Navigation from "~/components/ui/Navigation";
 import ScreenSizeWarning from "~/components/ui/ScreenSizeWarning";
 
 export default function Game() {
-  const showNameInput = uiStore((state) => state.showNameInput);
+  const showNameInput = useUIStore((state) => state.showNameInput);
 
   return (
     <>

@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 import type { PieceName } from "~/stores/types";
-import { gameStore } from "~/stores/gameStore";
-import { boardStore } from "~/stores/boardStore";
+import { useGameStore } from "~/stores/gameStore";
+import { useBoardStore } from "~/stores/boardStore";
 import Modal from "~/components/modals/Modal";
 
 export default function PawnPromotionModal() {
-  const promotionPosition = gameStore((state) => state.promotionPosition);
-  const board = boardStore((state) => state.board);
-  const promotePawn = boardStore((state) => state.promotePawn);
+  const promotionPosition = useGameStore((state) => state.promotionPosition);
+  const board = useBoardStore((state) => state.board);
+  const promotePawn = useBoardStore((state) => state.promotePawn);
 
   const promotingPiece = useMemo(
     () => (promotionPosition ? board.get(promotionPosition)?.piece : null),

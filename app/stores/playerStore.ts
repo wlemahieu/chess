@@ -8,7 +8,7 @@ interface PlayerState {
   resetPlayers: () => void;
 }
 
-export const playerStore = create<PlayerState>((set) => ({
+export const usePlayerStore = create<PlayerState>((set) => ({
   players: [
     { name: "Player 1", color: "white", moves: 0 },
     { name: "Player 2", color: "black", moves: 0 },

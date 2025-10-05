@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { uiStore } from "~/stores/uiStore";
+import { useUIStore } from "~/stores/uiStore";
 
 export default function DraggingCursor() {
-  const draggingPiece = uiStore((state) => state.draggingPiece);
-  const mousePosition = uiStore((state) => state.mousePosition);
-  const setMousePosition = uiStore((state) => state.setMousePosition);
+  const draggingPiece = useUIStore((state) => state.draggingPiece);
+  const mousePosition = useUIStore((state) => state.mousePosition);
+  const setMousePosition = useUIStore((state) => state.setMousePosition);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {

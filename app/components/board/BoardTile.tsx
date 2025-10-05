@@ -1,8 +1,8 @@
 import { memo, useCallback } from "react";
 import { twMerge } from "tailwind-merge";
 import type { BoardPosition, TileData } from "~/stores/types";
-import { uiStore } from "~/stores/uiStore";
-import { gameStore } from "~/stores/gameStore";
+import { useUIStore } from "~/stores/uiStore";
+import { useGameStore } from "~/stores/gameStore";
 import PieceDisplay from "~/components/board/PieceDisplay";
 
 interface BoardTileProps {
@@ -18,14 +18,14 @@ function BoardTile({
   isValidMove,
   isSelected,
 }: BoardTileProps) {
-  const currentTurn = gameStore((state) => state.currentTurn);
-  const showBoardPositions = uiStore((state) => state.showBoardPositions);
-  const showTileHover = uiStore((state) => state.showTileHover);
-  const showMovePaths = uiStore((state) => state.showMovePaths);
-  const setHoveredTile = uiStore((state) => state.setHoveredTile);
-  const selectedTile = uiStore((state) => state.selectedTile);
-  const setSelectedTile = uiStore((state) => state.setSelectedTile);
-  const setDraggingPiece = uiStore((state) => state.setDraggingPiece);
+  const currentTurn = useGameStore((state) => state.currentTurn);
+  const showBoardPositions = useUIStore((state) => state.showBoardPositions);
+  const showTileHover = useUIStore((state) => state.showTileHover);
+  const showMovePaths = useUIStore((state) => state.showMovePaths);
+  const setHoveredTile = useUIStore((state) => state.setHoveredTile);
+  const selectedTile = useUIStore((state) => state.selectedTile);
+  const setSelectedTile = useUIStore((state) => state.setSelectedTile);
+  const setDraggingPiece = useUIStore((state) => state.setDraggingPiece);
 
   const handleMouseEnter = useCallback(() => {
     if (tileData?.piece && tileData.piece.color === currentTurn) {

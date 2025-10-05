@@ -1,7 +1,7 @@
-import { gameStore } from "~/stores/gameStore";
+import { useGameStore } from "~/stores/gameStore";
 
 export default function TurnIndicator() {
-  const currentTurn = gameStore((state) => state.currentTurn);
+  const currentTurn = useGameStore((state) => state.currentTurn);
 
   return (
     <>

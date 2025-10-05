@@ -1,26 +1,26 @@
 import { useState, useEffect } from "react";
 import {
-  uiStore,
+  useUIStore,
   type PieceDisplayMode,
   type BoardSetupMode,
 } from "~/stores/uiStore";
-import { boardStore } from "~/stores/boardStore";
+import { useBoardStore } from "~/stores/boardStore";
 import Modal from "~/components/modals/Modal";
 
 export default function OptionsModal() {
-  const showOptions = uiStore((state) => state.showOptions);
-  const showBoardPositions = uiStore((state) => state.showBoardPositions);
-  const toggleBoardPositions = uiStore((state) => state.toggleBoardPositions);
-  const showTileHover = uiStore((state) => state.showTileHover);
-  const toggleTileHover = uiStore((state) => state.toggleTileHover);
-  const showMovePaths = uiStore((state) => state.showMovePaths);
-  const toggleMovePaths = uiStore((state) => state.toggleMovePaths);
-  const pieceDisplayMode = uiStore((state) => state.pieceDisplayMode);
-  const setPieceDisplayMode = uiStore((state) => state.setPieceDisplayMode);
-  const boardSetupMode = uiStore((state) => state.boardSetupMode);
-  const setBoardSetupMode = uiStore((state) => state.setBoardSetupMode);
-  const setShowOptions = uiStore((state) => state.setShowOptions);
-  const loadSetup = boardStore((state) => state.loadSetup);
+  const showOptions = useUIStore((state) => state.showOptions);
+  const showBoardPositions = useUIStore((state) => state.showBoardPositions);
+  const toggleBoardPositions = useUIStore((state) => state.toggleBoardPositions);
+  const showTileHover = useUIStore((state) => state.showTileHover);
+  const toggleTileHover = useUIStore((state) => state.toggleTileHover);
+  const showMovePaths = useUIStore((state) => state.showMovePaths);
+  const toggleMovePaths = useUIStore((state) => state.toggleMovePaths);
+  const pieceDisplayMode = useUIStore((state) => state.pieceDisplayMode);
+  const setPieceDisplayMode = useUIStore((state) => state.setPieceDisplayMode);
+  const boardSetupMode = useUIStore((state) => state.boardSetupMode);
+  const setBoardSetupMode = useUIStore((state) => state.setBoardSetupMode);
+  const setShowOptions = useUIStore((state) => state.setShowOptions);
+  const loadSetup = useBoardStore((state) => state.loadSetup);
 
   const [tempShowPositions, setTempShowPositions] =
     useState(showBoardPositions);
@@ -115,7 +115,7 @@ export default function OptionsModal() {
             className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="text">Text</option>
-            <option value="regular">Regular (Coming Soon)</option>
+            <option value="regular">Regular</option>
           </select>
         </div>
 

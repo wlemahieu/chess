@@ -8,8 +8,8 @@ import {
   isKingInCheck,
   isCheckmate,
 } from "../utils/chessRules";
-import { gameStore } from "./gameStore";
-import { playerStore } from "./playerStore";
+import { useGameStore } from "./gameStore";
+import { usePlayerStore } from "./playerStore";
 import type { BoardSetupMode } from "./uiStore";
 
 type BoardStore = Map<BoardPosition, TileData>;
@@ -26,14 +26,14 @@ interface BoardState {
   loadSetup: (setupMode: BoardSetupMode) => void;
 }
 
-export const boardStore = create<BoardState>((set, get) => ({
+export const useBoardStore = create<BoardState>((set, get) => ({
   board: createInitialBoard(),
 
   movePiece: (from, to) => {
     const board = get().board;
     const sourceTile = board.get(from);
     const destTile = board.get(to);
-    const currentTurn = gameStore.getState().currentTurn;
+    const currentTurn = useGameStore.getState().currentTurn;
 
     if (!sourceTile?.piece || !destTile) return false;
     if (sourceTile.piece.color !== currentTurn) return false;
@@ -46,7 +46,7 @@ export const boardStore = create<BoardState>((set, get) => ({
     }
 
     if (destTile.piece) {
-      gameStore.getState().addCapturedPiece(destTile.piece);
+      useGameStore.getState().addCapturedPiece(destTile.piece);
     }
 
     newBoard.set(to, {
@@ -68,12 +68,12 @@ export const boardStore = create<BoardState>((set, get) => ({
       ((movedPiece.color === "white" && toRow === "8") ||
         (movedPiece.color === "black" && toRow === "1"))
     ) {
-      gameStore.getState().setPromotionPosition(to);
+      useGameStore.getState().setPromotionPosition(to);
     }
 
-    playerStore.getState().incrementPlayerMoves(movedPiece.color);
-    gameStore.getState().updateGameStatus(newBoard);
-    gameStore.getState().switchTurn();
+    usePlayerStore.getState().incrementPlayerMoves(movedPiece.color);
+    useGameStore.getState().updateGameStatus(newBoard);
+    useGameStore.getState().switchTurn();
 
     return true;
   },
@@ -101,14 +101,14 @@ export const boardStore = create<BoardState>((set, get) => ({
     set({ board: newBoard });
     get().updateAllPaths();
 
-    gameStore.getState().setPromotionPosition(null);
+    useGameStore.getState().setPromotionPosition(null);
 
     const updatedBoard = get().board;
     const opponentColor = pawn.color === "white" ? "black" : "white";
 
     if (isKingInCheck(updatedBoard, opponentColor)) {
       const checkmate = isCheckmate(updatedBoard, opponentColor);
-      gameStore.setState({
+      useGameStore.setState({
         inCheck: opponentColor,
         checkmate,
         stalemate: false,
@@ -145,7 +145,7 @@ export const boardStore = create<BoardState>((set, get) => ({
     const newBoard = getBoardSetup(setupMode);
     set({ board: newBoard });
 
-    gameStore.getState().resetGame();
-    playerStore.getState().resetPlayers();
+    useGameStore.getState().resetGame();
+    usePlayerStore.getState().resetPlayers();
   },
 }));

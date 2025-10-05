@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTheme } from "~/contexts/ThemeContext";
-import { uiStore } from "~/stores/uiStore";
+import { useUIStore } from "~/stores/uiStore";
 import GameStatus from "../game/GameStatus";
 
 export default function Navigation() {
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
-  const setShowOptions = uiStore((state) => state.setShowOptions);
+  const setShowOptions = useUIStore((state) => state.setShowOptions);
 
   const handleOptionsClick = () => {
     setShowOptions(true);

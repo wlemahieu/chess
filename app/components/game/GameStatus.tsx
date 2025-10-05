@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import { twMerge } from "tailwind-merge";
-import { gameStore } from "~/stores/gameStore";
-import { playerStore } from "~/stores/playerStore";
-import { uiStore } from "~/stores/uiStore";
+import { useGameStore } from "~/stores/gameStore";
+import { usePlayerStore } from "~/stores/playerStore";
+import { useUIStore } from "~/stores/uiStore";
 
 export default function GameStatus() {
-  const currentTurn = gameStore((state) => state.currentTurn);
-  const inCheck = gameStore((state) => state.inCheck);
-  const players = playerStore((state) => state.players);
-  const showNameInput = uiStore((state) => state.showNameInput);
+  const currentTurn = useGameStore((state) => state.currentTurn);
+  const inCheck = useGameStore((state) => state.inCheck);
+  const players = usePlayerStore((state) => state.players);
+  const showNameInput = useUIStore((state) => state.showNameInput);
   const currentPlayer = useMemo(
     () => players.find((p) => p.color === currentTurn),
     [players, currentTurn]

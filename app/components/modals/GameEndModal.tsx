@@ -1,12 +1,12 @@
-import { gameStore } from "~/stores/gameStore";
-import { playerStore } from "~/stores/playerStore";
+import { useGameStore } from "~/stores/gameStore";
+import { usePlayerStore } from "~/stores/playerStore";
 import Modal from "~/components/modals/Modal";
 
 export default function GameEndModal() {
-  const checkmate = gameStore((state) => state.checkmate);
-  const stalemate = gameStore((state) => state.stalemate);
-  const currentTurn = gameStore((state) => state.currentTurn);
-  const players = playerStore((state) => state.players);
+  const checkmate = useGameStore((state) => state.checkmate);
+  const stalemate = useGameStore((state) => state.stalemate);
+  const currentTurn = useGameStore((state) => state.currentTurn);
+  const players = usePlayerStore((state) => state.players);
 
   const isOpen = checkmate || stalemate;
   const winner = checkmate

@@ -2,7 +2,11 @@ import { create } from "zustand";
 import type { BoardPosition } from "./types";
 
 export type PieceDisplayMode = "text" | "regular";
-export type BoardSetupMode = "normal" | "pawn-pre-promotion" | "endgame-practice" | "check-practice";
+export type BoardSetupMode =
+  | "normal"
+  | "pawn-pre-promotion"
+  | "endgame-practice"
+  | "check-practice";
 
 interface UIState {
   hoveredTile: BoardPosition | null;
@@ -31,7 +35,7 @@ interface UIState {
   clearSelection: () => void;
 }
 
-export const uiStore = create<UIState>((set) => ({
+export const useUIStore = create<UIState>((set) => ({
   hoveredTile: null,
   selectedTile: null,
   draggingPiece: null,
@@ -39,7 +43,7 @@ export const uiStore = create<UIState>((set) => ({
   showOptions: false,
   showNameInput: true,
   mousePosition: { x: 0, y: 0 },
-  pieceDisplayMode: "text",
+  pieceDisplayMode: "regular",
   boardSetupMode: "normal",
   showTileHover: false,
   showMovePaths: false,

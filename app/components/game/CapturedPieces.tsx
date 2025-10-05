@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { gameStore } from "~/stores/gameStore";
-import { uiStore } from "~/stores/uiStore";
+import { useGameStore } from "~/stores/gameStore";
+import { useUIStore } from "~/stores/uiStore";
+import PieceDisplay from "~/components/board/PieceDisplay";
 
 function getPieceSymbol(pieceName: string): string {
   const symbols: Record<string, string> = {
@@ -15,8 +16,8 @@ function getPieceSymbol(pieceName: string): string {
 }
 
 export default function CapturedPieces() {
-  const capturedPieces = gameStore((state) => state.capturedPieces);
-  const pieceDisplayMode = uiStore((state) => state.pieceDisplayMode);
+  const capturedPieces = useGameStore((state) => state.capturedPieces);
+  const pieceDisplayMode = useUIStore((state) => state.pieceDisplayMode);
   const [isMinimized, setIsMinimized] = useState(true);
 
   return (
@@ -40,7 +41,13 @@ export default function CapturedPieces() {
           <div className="flex flex-wrap gap-2">
             {capturedPieces.white.map((piece, idx) => (
               <div key={idx} className="text-lg font-bold">
-                {pieceDisplayMode === "text" ? getPieceSymbol(piece.name) : "●"}
+                {pieceDisplayMode === "text" ? (
+                  getPieceSymbol(piece.name)
+                ) : (
+                  <div className="w-8 h-8">
+                    <PieceDisplay piece={piece} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -51,7 +58,13 @@ export default function CapturedPieces() {
           <div className="flex flex-wrap gap-2">
             {capturedPieces.black.map((piece, idx) => (
               <div key={idx} className="text-lg font-bold">
-                {pieceDisplayMode === "text" ? getPieceSymbol(piece.name) : "○"}
+                {pieceDisplayMode === "text" ? (
+                  getPieceSymbol(piece.name)
+                ) : (
+                  <div className="w-8 h-8">
+                    <PieceDisplay piece={piece} />
+                  </div>
+                )}
               </div>
             ))}
           </div>

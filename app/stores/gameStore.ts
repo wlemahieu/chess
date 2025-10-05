@@ -18,7 +18,7 @@ interface GameState {
   resetGame: () => void;
 }
 
-export const gameStore = create<GameState>((set, get) => ({
+export const useGameStore = create<GameState>((set, get) => ({
   currentTurn: "white",
   inCheck: null,
   checkmate: false,

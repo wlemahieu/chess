@@ -1,10 +1,10 @@
-import { playerStore } from "~/stores/playerStore";
-import { uiStore } from "~/stores/uiStore";
+import { usePlayerStore } from "~/stores/playerStore";
+import { useUIStore } from "~/stores/uiStore";
 
 export default function PlayerNameInput() {
-  const players = playerStore((state) => state.players);
-  const setPlayerName = playerStore((state) => state.setPlayerName);
-  const setShowNameInput = uiStore((state) => state.setShowNameInput);
+  const players = usePlayerStore((state) => state.players);
+  const setPlayerName = usePlayerStore((state) => state.setPlayerName);
+  const setShowNameInput = useUIStore((state) => state.setShowNameInput);
 
   const handleStartGame = () => {
     setShowNameInput(false);

@@ -1,16 +1,16 @@
 import { useMemo, useEffect, useCallback } from "react";
 import type { BoardPosition, TileData } from "~/stores/types";
-import { boardStore } from "~/stores/boardStore";
-import { uiStore } from "~/stores/uiStore";
+import { useBoardStore } from "~/stores/boardStore";
+import { useUIStore } from "~/stores/uiStore";
 import { BOARD_LETTERS } from "~/utils/constants";
 import BoardTile from "~/components/board/BoardTile";
 
 export default function ChessBoard() {
-  const board = boardStore((state) => state.board);
-  const movePiece = boardStore((state) => state.movePiece);
-  const hoveredTile = uiStore((state) => state.hoveredTile);
-  const selectedTile = uiStore((state) => state.selectedTile);
-  const clearSelection = uiStore((state) => state.clearSelection);
+  const board = useBoardStore((state) => state.board);
+  const movePiece = useBoardStore((state) => state.movePiece);
+  const hoveredTile = useUIStore((state) => state.hoveredTile);
+  const selectedTile = useUIStore((state) => state.selectedTile);
+  const clearSelection = useUIStore((state) => state.clearSelection);
 
   const matrix = useMemo(() => {
     const result: Array<Array<[BoardPosition, TileData | undefined]>> = [];
