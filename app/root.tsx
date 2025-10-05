@@ -1,13 +1,7 @@
-import {
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from "react-router";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import type { LinksFunction } from "react-router";
 import appStylesHref from "./app.css?url";
-import { ThemeProvider } from "../src/contexts/ThemeContext";
+import { ThemeProvider } from "~/contexts/ThemeContext";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: appStylesHref },

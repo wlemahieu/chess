@@ -1,4 +1,4 @@
-import Game from "../../src/components/Game";
+import Game from "~/components/Game";
 
 export default function Index() {
   return <Game />;
