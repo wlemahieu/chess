@@ -37,17 +37,16 @@ const pieceComponents = {
 };
 
 function PieceDisplay({ piece }: PieceDisplayProps) {
-  const PieceComponent = pieceComponents[piece.color]?.[piece.name as keyof typeof pieceComponents.black];
+  const PieceComponent =
+    pieceComponents[piece.color]?.[
+      piece.name as keyof typeof pieceComponents.black
+    ];
 
   if (!PieceComponent) {
     return null;
   }
 
-  return (
-    <div className="w-full h-full flex items-center justify-center pointer-events-none">
-      <PieceComponent className="w-16 h-16" />
-    </div>
-  );
+  return <PieceComponent />;
 }
 
 export default memo(PieceDisplay);

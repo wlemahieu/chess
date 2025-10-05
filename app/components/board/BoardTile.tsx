@@ -80,7 +80,9 @@ function BoardTile({
           {position}
         </span>
       )}
-      {tileData?.piece && <PieceDisplay piece={tileData.piece} />}
+      <div className="flex flex-col items-center justify-center grow-0 shrink-0 min-h-[50px] min-w-[50px]">
+        {tileData?.piece && <PieceDisplay piece={tileData.piece} />}
+      </div>
     </div>
   );
 }

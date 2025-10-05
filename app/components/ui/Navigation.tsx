@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTheme } from "~/contexts/ThemeContext";
 import { uiStore } from "~/stores/uiStore";
+import GameStatus from "../game/GameStatus";
 
 export default function Navigation() {
   const { theme, toggleTheme } = useTheme();
@@ -139,6 +140,7 @@ export default function Navigation() {
             by Wes
           </span>
         </h1>
+        <GameStatus />
         <div
           className={`flex items-center gap-2 md:gap-4 transition-all duration-300 overflow-hidden ${
             isMinimized
