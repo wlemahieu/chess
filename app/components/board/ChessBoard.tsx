@@ -62,9 +62,9 @@ export default function ChessBoard() {
   }, [selectedTile, clearSelection]);
 
   return (
-    <div className="chess-board flex w-[800px] shadow-xl">
+    <div className="chess-board flex w-full max-w-[min(90vw,90vh-80px)] aspect-square shadow-xl">
       {matrix.map((letterColumn, columnIndex) => (
-        <div key={`column-${columnIndex}`} className="flex flex-col w-[100px]">
+        <div key={`column-${columnIndex}`} className="flex flex-col flex-1">
           {letterColumn.map((tile, tileIndex) => {
             const [position, tileData] = tile;
             if (!tileData) return null;
@@ -72,6 +72,7 @@ export default function ChessBoard() {
               <div
                 onClick={() => handleTileClick(position)}
                 key={`column-${columnIndex}-tile-${tileIndex}`}
+                className="flex-1"
               >
                 <BoardTile
                   position={position}

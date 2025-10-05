@@ -63,7 +63,7 @@ function BoardTile({
   return (
     <div
       className={twMerge(
-        "w-[100px] h-[100px] relative flex items-center justify-center cursor-pointer",
+        "w-full h-full relative flex items-center justify-center cursor-pointer",
         showTileHover && "hover:bg-blue-500 hover:z-10",
         tileData?.color === "black"
           ? "bg-gray-700 text-gray-100"

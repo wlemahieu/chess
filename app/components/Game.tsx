@@ -28,7 +28,7 @@ export default function Game() {
             <DraggingCursor />
             <TurnIndicator />
 
-            <div className="flex-1 flex flex-col items-center justify-center pt-16">
+            <div className="flex-1 flex flex-col items-center justify-center gap-4 px-4 py-20 md:py-24">
               <GameStatus />
               <ChessBoard />
             </div>

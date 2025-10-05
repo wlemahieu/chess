@@ -5,6 +5,7 @@ import { uiStore } from "~/stores/uiStore";
 export default function Navigation() {
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
   const setShowOptions = uiStore((state) => state.setShowOptions);
 
   const handleOptionsClick = () => {
@@ -118,12 +119,33 @@ export default function Navigation() {
   );
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 z-50">
-      <div className="flex items-center justify-between px-4 py-3">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Chess <span className="text-xs text-gray-300 italic">by Wes</span>
+    <nav
+      className="fixed top-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 z-50 transition-all duration-300"
+      onMouseEnter={() => setIsMinimized(false)}
+      onMouseLeave={() => setIsMinimized(true)}
+    >
+      <div
+        className={`flex items-center justify-between px-4 transition-all duration-300 ${
+          isMinimized ? "py-0.5" : "py-3"
+        }`}
+      >
+        <h1
+          className={`font-bold text-gray-900 dark:text-white transition-all duration-300 ${
+            isMinimized ? "text-xs" : "text-sm md:text-base"
+          }`}
+        >
+          Chess{" "}
+          <span className="text-xs text-gray-400 dark:text-gray-500 italic">
+            by Wes
+          </span>
         </h1>
-        <div className="flex items-center gap-4">
+        <div
+          className={`flex items-center gap-2 md:gap-4 transition-all duration-300 overflow-hidden ${
+            isMinimized
+              ? "opacity-0 scale-0 pointer-events-none max-h-0"
+              : "opacity-100 scale-100 max-h-20"
+          }`}
+        >
           <ThemeToggle />
           <OptionsButtonDesktop />
           <HamburgerMenuMobile />

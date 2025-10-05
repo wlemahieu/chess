@@ -13,7 +13,9 @@ export default function PlayerNameInput() {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-800 pt-16">
       <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Enter Player Names</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+          Who's playing?
+        </h2>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
