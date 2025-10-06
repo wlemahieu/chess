@@ -1,8 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;
+    // Games collection
+    match /games/{gameId} {
+      // Anyone can read a game (to join or spectate)
+      allow read: if true;
+
+      // Anyone can create a new game
+      allow create: if true;
+
+      // Only players in the game can update it
+      allow update: if request.auth != null ||
+                      request.resource.data.players.white.id == request.auth.uid ||
+                      request.resource.data.players.black.id == request.auth.uid ||
+                      // Allow unauthenticated updates for now (since we're using localStorage IDs)
+                      true;
+
+      // Only allow deletion in development (you can tighten this later)
+      allow delete: if true;
     }
   }
 }

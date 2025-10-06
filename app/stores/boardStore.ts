@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { BoardPosition, TileData, Piece, PieceName } from "./types";
+import type { BoardPosition, TileData, Piece, PieceName, MoveHistory } from "./types";
 import { createInitialBoard } from "../utils/boardSetup";
 import { getBoardSetup } from "../utils/boardSetupPresets";
 import { getPiecePath } from "../utils/pieceMovement";
@@ -10,6 +10,7 @@ import {
 } from "../utils/chessRules";
 import { useGameStore } from "./gameStore";
 import { usePlayerStore } from "./playerStore";
+import { useOnlineGameStore } from "./onlineGameStore";
 import type { BoardSetupMode } from "./uiStore";
 
 type BoardStore = Map<BoardPosition, TileData>;
@@ -34,9 +35,44 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     const sourceTile = board.get(from);
     const destTile = board.get(to);
     const currentTurn = useGameStore.getState().currentTurn;
+    const onlineGameStore = useOnlineGameStore.getState();
+    const isOnlineMode = onlineGameStore.gameMode === "online";
 
     if (!sourceTile?.piece || !destTile) return false;
     if (sourceTile.piece.color !== currentTurn) return false;
+
+    // In online mode, validate player can make this move
+    if (isOnlineMode) {
+      const { gameState, playerId } = onlineGameStore;
+
+      // Security: Validate against Firestore game state (source of truth)
+      if (!gameState || !playerId) {
+        console.error("Missing game state or player ID");
+        return false;
+      }
+
+      // Check if this player is actually allowed to make moves for this color
+      const isWhitePlayer = gameState.players.white?.id === playerId;
+      const isBlackPlayer = gameState.players.black?.id === playerId;
+
+      if (!isWhitePlayer && !isBlackPlayer) {
+        console.error("Player not in this game");
+        return false;
+      }
+
+      // Verify the player is moving their own pieces
+      const playerActualColor = isWhitePlayer ? "white" : "black";
+      if (sourceTile.piece.color !== playerActualColor) {
+        console.error("Cannot move opponent's pieces");
+        return false;
+      }
+
+      // Verify it's actually their turn (from Firestore)
+      if (gameState.currentTurn !== playerActualColor) {
+        console.error("Not your turn");
+        return false;
+      }
+    }
 
     const newBoard = new Map(board) as BoardStore;
     const movedPiece = { ...sourceTile.piece, hasMoved: true };
@@ -45,8 +81,10 @@ export const useBoardStore = create<BoardState>((set, get) => ({
       return false;
     }
 
-    if (destTile.piece) {
-      useGameStore.getState().addCapturedPiece(destTile.piece);
+    const capturedPiece = destTile.piece;
+
+    if (capturedPiece) {
+      useGameStore.getState().addCapturedPiece(capturedPiece);
     }
 
     newBoard.set(to, {
@@ -63,17 +101,33 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     get().updateAllPaths();
 
     const [, toRow] = to;
-    if (
+    const isPromotion =
       movedPiece.name === "pawn" &&
       ((movedPiece.color === "white" && toRow === "8") ||
-        (movedPiece.color === "black" && toRow === "1"))
-    ) {
+        (movedPiece.color === "black" && toRow === "1"));
+
+    if (isPromotion) {
       useGameStore.getState().setPromotionPosition(to);
     }
 
     usePlayerStore.getState().incrementPlayerMoves(movedPiece.color);
     useGameStore.getState().updateGameStatus(newBoard);
     useGameStore.getState().switchTurn();
+
+    // Sync with Firestore in online mode
+    if (isOnlineMode) {
+      const moveRecord: MoveHistory = {
+        from,
+        to,
+        piece: movedPiece.name,
+        color: movedPiece.color,
+        timestamp: Date.now(),
+        capturedPiece: capturedPiece?.name,
+      };
+
+      onlineGameStore.recordMove(moveRecord);
+      onlineGameStore.updateBoardState(newBoard);
+    }
 
     return true;
   },
@@ -82,6 +136,8 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     const board = get().board;
     const tile = board.get(position);
     const pawn = tile?.piece;
+    const onlineGameStore = useOnlineGameStore.getState();
+    const isOnlineMode = onlineGameStore.gameMode === "online";
 
     if (!tile || !pawn || pawn.name !== "pawn") return;
 
@@ -113,6 +169,11 @@ export const useBoardStore = create<BoardState>((set, get) => ({
         checkmate,
         stalemate: false,
       });
+    }
+
+    // Sync promotion with Firestore in online mode
+    if (isOnlineMode) {
+      onlineGameStore.updateBoardState(newBoard);
     }
   },
 

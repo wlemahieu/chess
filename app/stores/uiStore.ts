@@ -15,6 +15,7 @@ interface UIState {
   showBoardPositions: boolean;
   showOptions: boolean;
   showNameInput: boolean;
+  showModeSelection: boolean;
   mousePosition: { x: number; y: number };
   pieceDisplayMode: PieceDisplayMode;
   boardSetupMode: BoardSetupMode;
@@ -27,6 +28,7 @@ interface UIState {
   toggleBoardPositions: () => void;
   setShowOptions: (show: boolean) => void;
   setShowNameInput: (show: boolean) => void;
+  setShowModeSelection: (show: boolean) => void;
   setMousePosition: (position: { x: number; y: number }) => void;
   setPieceDisplayMode: (mode: PieceDisplayMode) => void;
   setBoardSetupMode: (mode: BoardSetupMode) => void;
@@ -41,7 +43,8 @@ export const useUIStore = create<UIState>((set) => ({
   draggingPiece: null,
   showBoardPositions: false,
   showOptions: false,
-  showNameInput: true,
+  showNameInput: false,
+  showModeSelection: true,
   mousePosition: { x: 0, y: 0 },
   pieceDisplayMode: "regular",
   boardSetupMode: "normal",
@@ -55,6 +58,7 @@ export const useUIStore = create<UIState>((set) => ({
     set((state) => ({ showBoardPositions: !state.showBoardPositions })),
   setShowOptions: (show) => set({ showOptions: show }),
   setShowNameInput: (show) => set({ showNameInput: show }),
+  setShowModeSelection: (show) => set({ showModeSelection: show }),
   setMousePosition: (position) => set({ mousePosition: position }),
   setPieceDisplayMode: (mode) => set({ pieceDisplayMode: mode }),
   setBoardSetupMode: (mode) => set({ boardSetupMode: mode }),

@@ -40,3 +40,45 @@ export interface Player {
 }
 
 export type Players = [Player, Player];
+
+// Online multiplayer types
+export type GameMode = "local" | "online";
+export type PlayerRole = "host" | "guest" | null;
+
+export interface MoveHistory {
+  from: BoardPosition;
+  to: BoardPosition;
+  piece: PieceName;
+  color: Color;
+  timestamp: number;
+  capturedPiece?: PieceName;
+  promotion?: PieceName;
+}
+
+export interface OnlinePlayer {
+  id: string;
+  name: string;
+  color: Color;
+  isConnected: boolean;
+  lastSeen: number;
+}
+
+export interface OnlineGameState {
+  gameId: string;
+  status: "waiting" | "active" | "completed";
+  mode: GameMode;
+  players: {
+    white: OnlinePlayer | null;
+    black: OnlinePlayer | null;
+  };
+  currentTurn: Color;
+  boardState: string; // Serialized board state
+  moveHistory: MoveHistory[];
+  capturedPieces: { white: PieceName[]; black: PieceName[] };
+  inCheck: Color | null;
+  checkmate: boolean;
+  stalemate: boolean;
+  createdAt: number;
+  updatedAt: number;
+  winner?: Color | "draw";
+}

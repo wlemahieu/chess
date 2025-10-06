@@ -30,7 +30,7 @@ wait_for_port() {
 trap cleanup SIGINT SIGTERM
 
 # Start Firebase emulators in the background
-firebase emulators:start --project=chess &
+firebase emulators:start --project=rdychess-com &
 EMULATOR_PID=$!
 
 # Wait for Firestore Emulator (127.0.0.1:8086)

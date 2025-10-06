@@ -1,7 +1,21 @@
 import { useGameStore } from "~/stores/gameStore";
+import { useOnlineGameStore } from "~/stores/onlineGameStore";
 
 export default function TurnIndicator() {
   const currentTurn = useGameStore((state) => state.currentTurn);
+  const gameMode = useOnlineGameStore((state) => state.gameMode);
+  const playerColor = useOnlineGameStore((state) => state.playerColor);
+
+  // In online mode, show "Your turn" if it's the player's turn
+  const isMyTurn = gameMode === "online" && currentTurn === playerColor;
+
+  const blackTurnText = gameMode === "online" && playerColor === "black" && isMyTurn
+    ? "Your turn"
+    : "Black's Turn";
+
+  const whiteTurnText = gameMode === "online" && playerColor === "white" && isMyTurn
+    ? "Your turn"
+    : "White's Turn";
 
   return (
     <>
@@ -30,7 +44,7 @@ export default function TurnIndicator() {
             </svg>
           </div>
           <div className="bg-gray-800 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg shadow-md">
-            <span className="font-bold text-sm md:text-lg">Black's Turn</span>
+            <span className="font-bold text-sm md:text-lg">{blackTurnText}</span>
           </div>
         </div>
       </div>
@@ -60,7 +74,7 @@ export default function TurnIndicator() {
             </svg>
           </div>
           <div className="bg-white dark:bg-gray-100 px-3 py-1.5 md:px-4 md:py-2 rounded-lg shadow-md">
-            <span className="font-bold text-sm md:text-lg text-gray-900">White's Turn</span>
+            <span className="font-bold text-sm md:text-lg text-gray-900">{whiteTurnText}</span>
           </div>
         </div>
       </div>
