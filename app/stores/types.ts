@@ -41,7 +41,6 @@ export interface Player {
 
 export type Players = [Player, Player];
 
-// Online multiplayer types
 export type GameMode = "local" | "online";
 export type PlayerRole = "host" | "guest" | null;
 

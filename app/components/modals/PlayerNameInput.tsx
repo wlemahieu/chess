@@ -19,7 +19,6 @@ export default function PlayerNameInput() {
   const [showWaitingRoom, setShowWaitingRoom] = useState(false);
   const [error, setError] = useState("");
 
-  // Check if this is a guest joining via URL (has gameId but no playerRole yet)
   const isJoiningGame = gameMode === "online" && gameId !== null && playerRole === null;
 
   const handleStartLocalGame = () => {
@@ -77,12 +76,10 @@ export default function PlayerNameInput() {
     }
   };
 
-  // Show waiting room if game is created and waiting for opponent
   if (showWaitingRoom) {
     return <OnlineWaitingRoom />;
   }
 
-  // Local mode
   if (gameMode === "local") {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-800 pt-16">
@@ -125,7 +122,6 @@ export default function PlayerNameInput() {
     );
   }
 
-  // Online mode - Create or Join
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-800 pt-16">
       <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg max-w-md w-full">

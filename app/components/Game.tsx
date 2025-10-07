@@ -22,11 +22,9 @@ export default function Game() {
   const setShowNameInput = useUIStore((state) => state.setShowNameInput);
   const setGameMode = useOnlineGameStore((state) => state.setGameMode);
 
-  // Sync online game state with Firestore
   useOnlineGameSync();
 
   useEffect(() => {
-    // Check for game ID in URL parameters
     const checkGameLink = async () => {
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
@@ -36,17 +34,14 @@ export default function Game() {
         console.log("Game param from URL:", gameParam);
 
         if (gameParam) {
-          // User has a game ID in the URL
           console.log("Found game ID in URL:", gameParam);
           setGameMode("online");
           setShowModeSelection(false);
 
-          // Check if this player is already in this game (reconnection)
           const playerId = localStorage.getItem("chess_player_id");
           console.log("Current player ID from localStorage:", playerId);
 
           if (playerId) {
-            // Try to fetch the game to see if this player is already in it
             const { getDoc, doc } = await import("firebase/firestore");
             const { db } = await import("~/firebase.client");
 
@@ -57,12 +52,10 @@ export default function Game() {
                 const gameData = gameDoc.data();
                 console.log("Game data:", gameData);
 
-                // Check if this player is already in the game
                 const isWhitePlayer = gameData.players?.white?.id === playerId;
                 const isBlackPlayer = gameData.players?.black?.id === playerId;
 
                 if (isWhitePlayer || isBlackPlayer) {
-                  // Player is reconnecting to their game
                   console.log("Player is reconnecting to game");
                   const playerColor = isWhitePlayer ? "white" : "black";
                   const playerRole = isWhitePlayer ? "host" : "guest";
@@ -75,7 +68,6 @@ export default function Game() {
                     isConnected: true,
                   });
 
-                  // Hide name input and mode selection, start syncing
                   setShowNameInput(false);
                   return;
                 }
@@ -85,7 +77,6 @@ export default function Game() {
             }
           }
 
-          // New player joining - show name input
           console.log("New player joining game");
           setShowNameInput(true);
           useOnlineGameStore.setState({ gameId: gameParam });

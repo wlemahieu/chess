@@ -24,7 +24,6 @@ import type {
 } from "./types";
 
 interface OnlineGameStore {
-  // State
   gameMode: GameMode;
   gameId: string | null;
   playerId: string | null;
@@ -34,7 +33,6 @@ interface OnlineGameStore {
   gameState: OnlineGameState | null;
   unsubscribe: Unsubscribe | null;
 
-  // Actions
   setGameMode: (mode: GameMode) => void;
   createOnlineGame: (playerName: string) => Promise<string>;
   joinOnlineGame: (gameId: string, playerName: string) => Promise<boolean>;
@@ -48,7 +46,6 @@ interface OnlineGameStore {
   getPlayerIdFromStorage: () => string;
 }
 
-// Helper to generate or retrieve player ID from localStorage
 function getOrCreatePlayerId(): string {
   if (typeof window === "undefined") return "";
 
@@ -60,20 +57,17 @@ function getOrCreatePlayerId(): string {
   return playerId;
 }
 
-// Helper to serialize board state
 function serializeBoardState(board: Map<BoardPosition, TileData>): string {
   const boardArray = Array.from(board.entries());
   return JSON.stringify(boardArray);
 }
 
-// Helper to deserialize board state
 export function deserializeBoardState(boardState: string): Map<BoardPosition, TileData> {
   const boardArray = JSON.parse(boardState);
   return new Map(boardArray);
 }
 
 export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
-  // Initial state
   gameMode: "local",
   gameId: null,
   playerId: null,
@@ -121,13 +115,11 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
     };
 
     try {
-      // Let Firestore generate the document ID
       console.log("Adding document to Firestore...");
       const docRef = await addDoc(collection(db, "games"), initialGameState);
       const gameId = docRef.id;
       console.log("Game created with ID:", gameId);
 
-      // Update the document with its own ID
       await updateDoc(docRef, { gameId });
       console.log("Game ID updated in document");
 
@@ -145,10 +137,8 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
         gameState: fullGameState,
       });
 
-      // Subscribe to game updates
       get().subscribeToGame(gameId);
 
-      // Save to game history
       saveGameToHistory({
         gameId,
         playerColor: "white",
@@ -180,7 +170,6 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
       const gameData = gameDoc.data() as OnlineGameState;
       console.log("Found game data:", gameData);
 
-      // Check if game is waiting for a player
       if (gameData.status !== "waiting") {
         console.error("Game is not waiting for players, status:", gameData.status);
         return false;
@@ -191,7 +180,6 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
         return false;
       }
 
-      // Join as black player
       const updatedGameState: Partial<OnlineGameState> = {
         status: "active",
         players: {
@@ -219,10 +207,8 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
         isConnected: true,
       });
 
-      // Subscribe to game updates
       get().subscribeToGame(gameId);
 
-      // Save to game history
       saveGameToHistory({
         gameId,
         playerColor: "black",
@@ -243,7 +229,6 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
     const { gameId, playerId, gameState } = get();
     if (!gameId || !playerId || !gameState) return;
 
-    // Security: Validate player identity against Firestore
     const isWhitePlayer = gameState.players.white?.id === playerId;
     const isBlackPlayer = gameState.players.black?.id === playerId;
 
@@ -271,7 +256,6 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
     const { gameId, gameState, playerId } = get();
     if (!gameId || !gameState || !playerId) return;
 
-    // Security: Re-validate player identity (defense in depth)
     const isWhitePlayer = gameState.players.white?.id === playerId;
     const isBlackPlayer = gameState.players.black?.id === playerId;
 
@@ -282,19 +266,16 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
 
     const playerColor = isWhitePlayer ? "white" : "black";
 
-    // Verify the move is for this player's color
     if (move.color !== playerColor) {
       console.error("Cannot record move: color mismatch");
       return;
     }
 
-    // Verify it's this player's turn
     if (gameState.currentTurn !== playerColor) {
       console.error("Cannot record move: not player's turn");
       return;
     }
 
-    // Remove undefined fields from the move object
     const cleanMove: MoveHistory = {
       from: move.from,
       to: move.to,
@@ -303,7 +284,6 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
       timestamp: move.timestamp,
     };
 
-    // Only add optional fields if they exist
     if (move.capturedPiece) {
       cleanMove.capturedPiece = move.capturedPiece;
     }
@@ -326,7 +306,6 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
     const { gameId, playerId, gameState } = get();
     if (!gameId || !playerId || !gameState) return;
 
-    // Security: Validate player is in the game
     const isWhitePlayer = gameState.players.white?.id === playerId;
     const isBlackPlayer = gameState.players.black?.id === playerId;
 
@@ -351,7 +330,6 @@ export const useOnlineGameStore = create<OnlineGameStore>((set, get) => ({
     const { gameId, playerId, gameState } = get();
     if (!gameId || !playerId || !gameState) return;
 
-    // Security: Validate player is in the game
     const isWhitePlayer = gameState.players.white?.id === playerId;
     const isBlackPlayer = gameState.players.black?.id === playerId;
 

@@ -17,21 +17,18 @@ export function useOnlineGameSync() {
   const getPlayerIdFromStorage = useOnlineGameStore((state) => state.getPlayerIdFromStorage);
   const subscribeToGame = useOnlineGameStore((state) => state.subscribeToGame);
 
-  // Initialize player ID from localStorage on mount
   useEffect(() => {
     if (gameMode === "online") {
       getPlayerIdFromStorage();
     }
   }, [gameMode, getPlayerIdFromStorage]);
 
-  // Subscribe to game updates
   useEffect(() => {
     if (gameMode === "online" && gameId && !gameState) {
       subscribeToGame(gameId);
     }
   }, [gameMode, gameId, gameState, subscribeToGame]);
 
-  // Update connection status when component mounts/unmounts
   useEffect(() => {
     if (gameMode === "online" && gameId && playerId) {
       updatePlayerConnection(true);
@@ -42,10 +39,8 @@ export function useOnlineGameSync() {
     }
   }, [gameMode, gameId, playerId, updatePlayerConnection]);
 
-  // Sync game state from Firestore to local stores
   useEffect(() => {
     if (gameMode === "online" && gameState) {
-      // Update board state
       if (gameState.boardState) {
         try {
           const board = deserializeBoardState(gameState.boardState);
@@ -56,7 +51,6 @@ export function useOnlineGameSync() {
         }
       }
 
-      // Update game store
       useGameStore.setState({
         currentTurn: gameState.currentTurn,
         inCheck: gameState.inCheck,
@@ -76,7 +70,6 @@ export function useOnlineGameSync() {
         },
       });
 
-      // Update player names
       if (gameState.players.white) {
         usePlayerStore.getState().setPlayerName("white", gameState.players.white.name);
       }
@@ -86,18 +79,16 @@ export function useOnlineGameSync() {
     }
   }, [gameMode, gameState]);
 
-  // Handle heartbeat to keep connection alive
   useEffect(() => {
     if (gameMode === "online" && gameId && playerId) {
       const heartbeatInterval = setInterval(() => {
         updatePlayerConnection(true);
-      }, 30000); // Update every 30 seconds
+      }, 30000);
 
       return () => clearInterval(heartbeatInterval);
     }
   }, [gameMode, gameId, playerId, updatePlayerConnection]);
 
-  // Handle reconnection when tab regains focus
   useEffect(() => {
     if (gameMode === "online" && gameId && playerId) {
       const handleFocus = () => {
@@ -109,7 +100,6 @@ export function useOnlineGameSync() {
     }
   }, [gameMode, gameId, playerId, updatePlayerConnection]);
 
-  // Handle page unload
   useEffect(() => {
     if (gameMode === "online" && gameId && playerId) {
       const handleBeforeUnload = () => {

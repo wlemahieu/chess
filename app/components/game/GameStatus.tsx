@@ -9,12 +9,13 @@ export default function GameStatus() {
   const inCheck = useGameStore((state) => state.inCheck);
   const players = usePlayerStore((state) => state.players);
   const showNameInput = useUIStore((state) => state.showNameInput);
+  const showModeSelection = useUIStore((state) => state.showModeSelection);
   const currentPlayer = useMemo(
     () => players.find((p) => p.color === currentTurn),
     [players, currentTurn]
   );
 
-  if (showNameInput) return null;
+  if (showNameInput || showModeSelection) return null;
 
   return (
     <h2 className="font-bold text-black dark:text-white text-sm">

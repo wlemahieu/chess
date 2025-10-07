@@ -41,17 +41,14 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     if (!sourceTile?.piece || !destTile) return false;
     if (sourceTile.piece.color !== currentTurn) return false;
 
-    // In online mode, validate player can make this move
     if (isOnlineMode) {
       const { gameState, playerId } = onlineGameStore;
 
-      // Security: Validate against Firestore game state (source of truth)
       if (!gameState || !playerId) {
         console.error("Missing game state or player ID");
         return false;
       }
 
-      // Check if this player is actually allowed to make moves for this color
       const isWhitePlayer = gameState.players.white?.id === playerId;
       const isBlackPlayer = gameState.players.black?.id === playerId;
 
@@ -60,14 +57,12 @@ export const useBoardStore = create<BoardState>((set, get) => ({
         return false;
       }
 
-      // Verify the player is moving their own pieces
       const playerActualColor = isWhitePlayer ? "white" : "black";
       if (sourceTile.piece.color !== playerActualColor) {
         console.error("Cannot move opponent's pieces");
         return false;
       }
 
-      // Verify it's actually their turn (from Firestore)
       if (gameState.currentTurn !== playerActualColor) {
         console.error("Not your turn");
         return false;
@@ -114,7 +109,6 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     useGameStore.getState().updateGameStatus(newBoard);
     useGameStore.getState().switchTurn();
 
-    // Sync with Firestore in online mode
     if (isOnlineMode) {
       const moveRecord: MoveHistory = {
         from,
@@ -171,7 +165,6 @@ export const useBoardStore = create<BoardState>((set, get) => ({
       });
     }
 
-    // Sync promotion with Firestore in online mode
     if (isOnlineMode) {
       onlineGameStore.updateBoardState(newBoard);
     }

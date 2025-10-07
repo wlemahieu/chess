@@ -30,16 +30,13 @@ function BoardTile({
   const gameMode = useOnlineGameStore((state) => state.gameMode);
   const playerColor = useOnlineGameStore((state) => state.playerColor);
 
-  // Determine if this piece can be interacted with
   const canInteract = useMemo(() => {
     if (!tileData?.piece) return false;
 
-    // In local mode, can interact with pieces of current turn
     if (gameMode === "local") {
       return tileData.piece.color === currentTurn;
     }
 
-    // In online mode, can only interact with own pieces
     if (gameMode === "online") {
       return tileData.piece.color === playerColor;
     }
@@ -47,7 +44,6 @@ function BoardTile({
     return false;
   }, [tileData, gameMode, currentTurn, playerColor]);
 
-  // Determine if this is an opponent's piece
   const isOpponentPiece = useMemo(() => {
     if (!tileData?.piece || gameMode !== "online") return false;
     return tileData.piece.color !== playerColor;

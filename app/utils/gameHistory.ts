@@ -39,18 +39,15 @@ export function saveGameToHistory(game: GameHistoryItem): void {
     const existingIndex = history.findIndex((g) => g.gameId === game.gameId);
 
     if (existingIndex >= 0) {
-      // Update existing game
       history[existingIndex] = {
         ...history[existingIndex],
         ...game,
         lastPlayedAt: Date.now(),
       };
     } else {
-      // Add new game
       history.unshift(game);
     }
 
-    // Keep only the last 50 games
     const trimmedHistory = history.slice(0, 50);
     localStorage.setItem(GAME_HISTORY_KEY, JSON.stringify(trimmedHistory));
   } catch (error) {

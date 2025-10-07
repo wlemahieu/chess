@@ -24,7 +24,6 @@ export default function GameModeSelection() {
   };
 
   const handleSelectGame = (gameId: string) => {
-    // Navigate to the game URL
     if (typeof window !== "undefined") {
       window.location.href = `/?game=${gameId}`;
     }
@@ -48,7 +47,6 @@ export default function GameModeSelection() {
         </p>
 
         <div className="space-y-4">
-          {/* Local Mode */}
           <button
             onClick={handleLocalMode}
             className="w-full group relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-6 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
@@ -67,7 +65,6 @@ export default function GameModeSelection() {
             </div>
           </button>
 
-          {/* Online Mode */}
           <button
             onClick={handleOnlineMode}
             className="w-full group relative overflow-hidden bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-6 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg"
@@ -87,7 +84,6 @@ export default function GameModeSelection() {
           </button>
         </div>
 
-        {/* My Games Button */}
         {activeGamesCount > 0 && (
           <button
             onClick={() => setShowMyGames(true)}

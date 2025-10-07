@@ -3,10 +3,19 @@ import { useOnlineGameStore } from "~/stores/onlineGameStore";
 
 export default function TurnIndicator() {
   const currentTurn = useGameStore((state) => state.currentTurn);
+  const lastMove = useGameStore((state) => state.lastMove);
   const gameMode = useOnlineGameStore((state) => state.gameMode);
   const playerColor = useOnlineGameStore((state) => state.playerColor);
+  const gameState = useOnlineGameStore((state) => state.gameState);
 
-  // In online mode, show "Your turn" if it's the player's turn
+  const isGameActive =
+    (gameMode === "online" && gameState?.status === "active") ||
+    (gameMode === "local" && lastMove !== null);
+
+  if (!isGameActive) {
+    return null;
+  }
+
   const isMyTurn = gameMode === "online" && currentTurn === playerColor;
 
   const blackTurnText = gameMode === "online" && playerColor === "black" && isMyTurn

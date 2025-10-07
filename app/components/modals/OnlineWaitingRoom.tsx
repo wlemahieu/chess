@@ -17,7 +17,6 @@ export default function OnlineWaitingRoom() {
   }, [gameId]);
 
   useEffect(() => {
-    // When player 2 joins, hide this waiting room
     if (gameState?.status === "active" && gameState?.players.black) {
       setShowNameInput(false);
     }
@@ -56,7 +55,6 @@ export default function OnlineWaitingRoom() {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100 dark:bg-gray-800 pt-16">
       <div className="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg max-w-lg w-full">
-        {/* Header */}
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
             Waiting for Opponent
@@ -66,7 +64,6 @@ export default function OnlineWaitingRoom() {
           </p>
         </div>
 
-        {/* Loading Animation */}
         <div className="flex justify-center mb-6">
           <div className="relative w-24 h-24">
             <div className="absolute inset-0 border-4 border-gray-200 dark:border-gray-700 rounded-full"></div>
@@ -77,7 +74,6 @@ export default function OnlineWaitingRoom() {
           </div>
         </div>
 
-        {/* Player Info */}
         <div className="mb-6 p-4 bg-blue-50 dark:bg-gray-800 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
@@ -92,7 +88,6 @@ export default function OnlineWaitingRoom() {
           </div>
         </div>
 
-        {/* Share Link Section */}
         <div className="mb-6">
           <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
             Game Link
@@ -117,7 +112,6 @@ export default function OnlineWaitingRoom() {
           </div>
         </div>
 
-        {/* Share Button */}
         <button
           onClick={handleShare}
           className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg mb-4"
@@ -125,7 +119,6 @@ export default function OnlineWaitingRoom() {
           📤 Share Link
         </button>
 
-        {/* QR Code Placeholder (optional future enhancement) */}
         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
             💡 Send this link to your friend. Once they join, the game will
@@ -133,7 +126,6 @@ export default function OnlineWaitingRoom() {
           </p>
         </div>
 
-        {/* Game ID Display */}
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-500 dark:text-gray-500">
             Game ID: <code className="font-mono">{gameId}</code>

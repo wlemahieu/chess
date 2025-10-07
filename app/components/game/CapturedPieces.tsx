@@ -71,7 +71,6 @@ export default function CapturedPieces() {
         </div>
       </div>
 
-      {/* Visual indicator for minimized state */}
       <div
         className={`absolute left-0 top-1/2 -translate-y-1/2 transition-all duration-300 ${
           isMinimized ? "opacity-100" : "opacity-0"

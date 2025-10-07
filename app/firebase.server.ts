@@ -46,7 +46,6 @@ export async function getDocument(collectionName: string, documentId: string) {
   }
 }
 
-// Get a collection
 export async function getCollection(collectionName: string) {
   try {
     const collectionRef = firestore.collection(collectionName);
